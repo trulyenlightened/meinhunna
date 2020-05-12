@@ -33,7 +33,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = database.uri_string
     app.config['ERROR_404_HELP'] = False
 
-    app.debug = True
+    app.debug = False
 
     JWTManager(app)
 
@@ -45,7 +45,7 @@ def start_app():
     Starts the app, binding to all hosts.
     """
     app = create_app()
-    app.run() #host='0.0.0.0' for pord
+    app.run(host='0.0.0.0') #host='0.0.0.0' for pord
 
 
 if __name__ == '__main__':

@@ -8,10 +8,10 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from src.models import Base
 
 
-db_user = "postgres" #"postgres" Development server
-db_password = "shaurya12" #"shaurya12"
+db_user = "Merchant" #"postgres" Development server
+db_password = "merchant0909" #"shaurya12"
 db_name = "MerchantDB" #"MerchantDB"
-db_host = "0.0.0.0" #"0.0.0.0"
+db_host = "database-2.crfy9ltvtgyi.us-east-2.rds.amazonaws.com" #"0.0.0.0"
 db_port = 5432 #5432
 
 uri_string = f'postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
