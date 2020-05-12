@@ -1,0 +1,73 @@
+"""
+Database schema definition
+"""
+
+from enum import Enum
+
+import sqlalchemy
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+
+class Delivery_Status(Enum):
+    Pending = 'Pending'
+    Cancelled = 'Cancelled'
+    Shipped = 'Shipped'
+    Delivered = 'Delivered'
+
+class User(Base):
+    """ Database table for users """
+    __tablename__ = 'users'
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    email = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    phone_number = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    address = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    password_hash = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    created_at = sqlalchemy.Column(sqlalchemy.DateTime(), nullable=True)
+
+class Delivery_Boy(Base):
+    """ Database table for Delivery_Boy """
+    __tablename__ = 'delivery_boys'
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    phone_number = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    email = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    created_at = sqlalchemy.Column(sqlalchemy.DateTime(), nullable=True)
+
+class Merchant(Base):
+    """ Database table for Merchant """
+    __tablename__ = 'merchants'
+    id = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True)
+    name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    phone_number = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    email = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    lat_long = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    address = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    password_hash = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    created_at = sqlalchemy.Column(sqlalchemy.DateTime(), nullable=True)
+    boys_id = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.Integer))
+
+class Order(Base):
+    """ Database table for Order"""
+    __tablename__ = 'orders'
+    id = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True)
+    user_id = sqlalchemy.Column(sqlalchemy.ForeignKey(User.id))
+    merchant_id = sqlalchemy.Column(sqlalchemy.ForeignKey(Merchant.id))
+    boys_id = sqlalchemy.Column(sqlalchemy.ForeignKey(Delivery_Boy.id))
+    items = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.String))
+    quantity = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.String))
+    delivery_id = sqlalchemy.Column(sqlalchemy.BigInteger, nullable=True)
+    order_address = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    status = sqlalchemy.Column(sqlalchemy.types.Enum(Delivery_Status))
+    created_at = sqlalchemy.Column(sqlalchemy.DateTime(), nullable=True)
+
+class Item(Base):
+    """ Database table for Item"""
+    __tablename__ = 'items'
+    id = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True)
+    merchant_id = sqlalchemy.Column(sqlalchemy.ForeignKey(Merchant.id))
+    item_name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    unit = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
