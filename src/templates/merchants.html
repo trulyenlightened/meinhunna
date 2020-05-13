@@ -107,7 +107,12 @@
                         <td>{{ merchant.email }}</td>
 						<td>{{ merchant.latitude }}</td>
                         <td>{{ merchant.longitude }}</td>
-
+                        {% for boy in boys %}
+                            {% if boy.id == merchant.boy_id[0] %}
+                                <td>{{ boy.name }}</td>
+                            {% else %}
+                                <td>{{ merchant.boy_id[0] }}</td>
+                        {% endfor %}
                         <td>{{ merchant.phone_number }}</td>
                         <td>
                             <a href="#editEmployeeModal" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
