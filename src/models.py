@@ -44,9 +44,8 @@ class Merchant(Base):
     name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     phone_number = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
-    lat_long = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
-    address = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
-    password_hash = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    latitude = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    longitude = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     created_at = sqlalchemy.Column(sqlalchemy.DateTime(), nullable=True)
     boys_id = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.Integer))
 

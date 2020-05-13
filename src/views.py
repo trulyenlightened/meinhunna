@@ -12,21 +12,11 @@ from src.resources.authentication import (JWTDistributor,
                                           TokenValidator,
                                           FacebookLogin,
                                           GoogleLogin)
-# from src.resources.notifications import Notification, NotificationList
 
-view_blueprint = Blueprint('view_blueprint', __name__)
+# view_blueprint = Blueprint('view_blueprint', __name__)
 api_blueprint = Blueprint('api_blueprint', __name__)
 
 api = Api(api_blueprint)
-
-
-@view_blueprint.route('/')
-def index():
-    """
-    Serve main page. index.html should include the react bundle.js
-    Maybe later we'll play around with Server Side Rendering
-    """
-    return render_template('index.html')
 
 
 api.add_resource(JWTDistributor, '/api/v1/auth')
@@ -45,6 +35,3 @@ api.add_resource(Merchant, '/api/v1/merchants')
 api.add_resource(OTPSignUpMerchant, '/api/v1/otpmerchant')
 api.add_resource(Items, '/api/v1/merchants/items')
 api.add_resource(DeliveryBoy, '/api/v1/merchants/boy')
-
-# api.add_resource(NotificationList, '/api/v1/notifications')
-# api.add_resource(Notification, '/api/v1/notifications/<notification_id>')

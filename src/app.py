@@ -19,7 +19,8 @@ sys.path.append(root_dir)
 def create_app():
 
     from src import database
-    from src.views import view_blueprint, api_blueprint
+    from src.views import api_blueprint
+    from src.auth.views import view_blueprint
 
     app = Flask(__name__)
 
