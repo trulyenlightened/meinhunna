@@ -70,3 +70,11 @@ class Item(Base):
     merchant_id = sqlalchemy.Column(sqlalchemy.ForeignKey(Merchant.id))
     item_name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     unit = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+
+class Admin(Base):
+    """ Database table for Admin """
+    __tablename__ = 'admin'
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    password_hash = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    created_at = sqlalchemy.Column(sqlalchemy.DateTime(), nullable=True)

@@ -9,6 +9,7 @@ import sys
 
 from flask import Flask
 from flask_jwt_extended import JWTManager
+from flask_jwt_extended.config import config
 
 current_path = os.path.abspath(getsourcefile(lambda: 0))
 current_dir = os.path.dirname(current_path)
@@ -33,6 +34,10 @@ def create_app():
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=365)
     app.config['SQLALCHEMY_DATABASE_URI'] = database.uri_string
     app.config['ERROR_404_HELP'] = False
+    app.config['JWT_TOKEN_LOCATION']= 'cookies'
+    app.config['JWT_COOKIE_SECURE'] = False
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = True
+    # app.config['JWT_CSRF_IN_COOKIES'] = False
 
     app.debug = True
 

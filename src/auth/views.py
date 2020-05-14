@@ -4,6 +4,15 @@ import src.models as models
 from datetime import datetime
 import datetime
 from argon2 import PasswordHasher
+import jsonify
+
+from flask_login import login_required, login_user, logout_user
+
+
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token, set_access_cookies, jwt_refresh_token_required,
+    get_jwt_identity, create_refresh_token, set_refresh_cookies, unset_jwt_cookies
+)
 
 ph = PasswordHasher(hash_len=64, salt_len=32)
 
@@ -13,13 +22,65 @@ view_blueprint = Blueprint('view_blueprint', __name__)
 def index():
     return render_template('index.html')
 
+@view_blueprint.route('/update_user_uri/<user_id>', methods=['GET', 'POST'])
+def update_user_uri(user_id):
+    users = db_session.query(models.User).filter(models.User.id == user_id).all()
+    return render_template('update_user.html', title="Update User", users=users)
+
+@view_blueprint.route('/update_merchant_uri/<merchant_id>', methods=['GET', 'POST'])
+def update_merchant_uri(merchant_id):
+    merchants = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).all()
+    boys = db_session.query(models.Delivery_Boy).all()
+    return render_template('update_merchant.html', title="Update Merchant", merchants=merchants, boys=boys)
+
+@view_blueprint.route('/update_boy_uri/<boy_id>', methods=['GET', 'POST'])
+def update_boy_uri(boy_id):
+    boys = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).all()
+    return render_template('update_delivery_boy.html', title="Update boys", boys=boys)
+
+@view_blueprint.route('/admin/')
+def admin():
+    return render_template('admin_login.html', title="Admin Login")
+
+@view_blueprint.route('/admin_logout/', methods=['POST'])
+@jwt_required
+def logout():
+    res = jsonify({'logout': True})
+    unset_access_cookies(res)
+    return resp, 200
+    # return redirect(url_for('view_blueprint.index'))
+
+
+@view_blueprint.route('/admin_login/', methods=['POST'])
+def admin_login():
+    name = request.form['name']
+    password = request.form['password']
+
+    admin = db_session.query(models.Admin).filter(models.Admin.name == name).one_or_none()
+    if admin is None:
+        return {"message": "Admin Not Available"}
+
+    try:
+        ph.verify(admin.password_hash, password)
+        access_token = create_access_token(identity=name)
+
+        resp = redirect(url_for('view_blueprint.users'))
+        set_access_cookies(resp, access_token)
+    except Exception as e:
+        print(e)
+        return {"message": "Admin Verification Failed"}
+
+    return resp
+
 @view_blueprint.route('/users/')
+@jwt_required
 def users():
     users = db_session.query(models.User).all()
     total_user = len(users)
     return render_template('users.html', users=users, total_user=total_user, title="Users")
 
 @view_blueprint.route('/add_user/', methods=['POST'])
+@jwt_required
 def add_user():
     try:
         name = request.form['name']
@@ -50,17 +111,49 @@ def add_user():
 
     return redirect(url_for('view_blueprint.users'))
 
-@view_blueprint.route('/update_user/', methods=['PUT'])
+@view_blueprint.route('/update_user/', methods=['POST'])
 def update_user():
-    pass
+    try:
+        name = request.form['name']
+        new_name = request.form['new_name']
+        email = request.form['email']
+        new_email = request.form['new_email']
+        address = request.form['address']
+        new_address = request.form['new_address']
+        phone_number = request.form['phone_number']
+        new_phone_number = request.form['new_phone_number']
+        user = db_session.query(models.User).filter(models.User.name == name).one()
+
+        user.name = new_name
+        user.email = new_email
+        user.address = new_address
+        user.phone_number = new_phone_number
+
+
+    except Exception as e:
+        print(e)
+        return {"message": "user Update Adding failed"}
+    try:
+        db_session.commit()
+
+    except Exception as e:
+        print(e)
+        return {"message": "user Update commit failed"}
+
+    return redirect(url_for('view_blueprint.users'))
+
+
+
 
 @view_blueprint.route('/delete_user/<user_id>', methods=['GET', 'POST'])
+@jwt_required
 def delete_user(user_id):
     user = db_session.query(models.User).filter(models.User.id == user_id).delete()
     db_session.commit()
     return redirect(url_for('view_blueprint.users'))
 
 @view_blueprint.route('/merchants/')
+@jwt_required
 def merchants():
     merchants = db_session.query(models.Merchant).all()
     boys = db_session.query(models.Delivery_Boy).all()
@@ -104,23 +197,64 @@ def add_merchant():
     return redirect(url_for('view_blueprint.merchants'))
 
 
-@view_blueprint.route('/update_merchant/', methods=['PUT'])
+@view_blueprint.route('/update_merchant/', methods=['POST'])
 def update_merchant():
-    pass
+    try:
+        name = request.form['name']
+        new_name = request.form['new_name']
+        email = request.form['email']
+        new_email = request.form['new_email']
+        latitude = request.form['latitude']
+        new_latitude = request.form['new_latitude']
+        longitude = request.form['longitude']
+        new_longitude = request.form['new_longitude']
+        boys_id = request.form['delivery-boys']
+        phone_number = request.form['phone_number']
+        new_phone_number = request.form['new_phone_number']
+
+        merchant = db_session.query(models.Merchant).filter(models.Merchant.name == name).one()
+
+        merchant.name = new_name
+        merchant.email = new_email
+        merchant.latitude = new_latitude
+        merchant.longitude = new_longitude
+        merchant.phone_number = new_phone_number
+
+        if int(boys_id) in merchant.boys_id:
+            pass
+        else:
+            del merchant.boys_id[0]
+            merchant.boys_id.append(int(boys_id))
+
+    except Exception as e:
+        print(e)
+        return {"message": "merchant Update Adding failed"}
+    try:
+        db_session.commit()
+
+    except Exception as e:
+        print(e)
+        return {"message": "merchant Update commit failed"}
+
+    return redirect(url_for('view_blueprint.merchants'))
+
 
 @view_blueprint.route('/delete_merchant/<merchant_id>', methods=['GET', 'POST'])
+@jwt_required
 def delete_merchant(merchant_id):
     merchant = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).delete()
     db_session.commit()
     return redirect(url_for('view_blueprint.merchants'))
 
 @view_blueprint.route('/orders/')
+@jwt_required
 def orders():
     orders = db_session.query(models.Order).all()
     total_order = len(orders)
     return render_template('orders.html', orders=orders, total_order=total_order, title="Orders")
 
 @view_blueprint.route('/delivery_boy/')
+@jwt_required
 def delivery_boy():
     boys = db_session.query(models.Delivery_Boy).all()
     total_boy = len(boys)
@@ -153,7 +287,37 @@ def add_boy():
 
     return redirect(url_for('view_blueprint.delivery_boy'))
 
+@view_blueprint.route('/update_boy/', methods=['POST'])
+def update_boy():
+    try:
+        name = request.form['name']
+        new_name = request.form['new_name']
+        email = request.form['email']
+        new_email = request.form['new_email']
+        phone_number = request.form['phone_number']
+        new_phone_number = request.form['new_phone_number']
+
+        boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.name == name).one()
+
+        boy.name = new_name
+        boy.email = new_email
+        boy.phone_number = new_phone_number
+
+    except Exception as e:
+        print(e)
+        return {"message": "delivery_boy Update Adding failed"}
+    try:
+        db_session.commit()
+
+    except Exception as e:
+        print(e)
+        return {"message": "delivery_boy Update commit failed"}
+
+    return redirect(url_for('view_blueprint.delivery_boy'))
+
+
 @view_blueprint.route('/delete_boy/<boy_id>', methods=['GET', 'POST'])
+@jwt_required
 def delete_boy(boy_id):
     boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).delete()
     db_session.commit()
