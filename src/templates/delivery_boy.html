@@ -109,8 +109,8 @@
                         {% endif %}
 
                         <td>
-                            <a href="#editEmployeeModal" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
-                            <a href="{{ url_for('view_blueprint.delete_boy', boy_id=boy.id) }}" name="boy_id" value="1" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
+                            <a href="{{ url_for('view_blueprint.update_boy_uri', boy_id=boy.id) }}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
+                            <a href="{{ url_for('view_blueprint.delete_boy', boy_id=boy.id) }}" onclick="return confirm('Are you sure you want to delete this item?');" name="boy_id" value="1" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
 
                         </td>
                     </tr>

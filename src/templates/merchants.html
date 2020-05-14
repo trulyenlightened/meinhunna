@@ -74,7 +74,11 @@
 					<div class="col-sm-6">
 						<a href="#addEmployeeModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Merchant</span></a>
 						<a href="#deleteEmployeeModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons">&#xE15C;</i> <span>Delete</span></a>
+<<<<<<< HEAD
                         
+=======
+
+>>>>>>> develop
                     </div>
                 </div>
             </div>
@@ -116,7 +120,11 @@
                             {% endfor %}
                         <td>{{ merchant.phone_number }}</td>
                         <td>
+<<<<<<< HEAD
                             <a href="#editEmployeeModal" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
+=======
+                            <a href="{{ url_for('view_blueprint.update_merchant_uri', merchant_id=merchant.id) }}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
+>>>>>>> develop
                             <!-- <a href="#deleteEmployeeModal" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a> -->
                             <a href="{{ url_for('view_blueprint.delete_merchant', merchant_id=merchant.id) }}" onclick="return confirm('Are you sure you want to delete this item?');"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
                         </td>
