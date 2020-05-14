@@ -238,13 +238,8 @@ def update_merchant():
 
     return redirect(url_for('view_blueprint.merchants'))
 
-<<<<<<< HEAD
-@view_blueprint.route('/delete_merchant/<merchant_id>', methods=['GET', 'POST'])
-=======
-
 @view_blueprint.route('/delete_merchant/<merchant_id>', methods=['GET', 'POST'])
 @jwt_required
->>>>>>> develop
 def delete_merchant(merchant_id):
     merchant = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).delete()
     db_session.commit()
