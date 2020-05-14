@@ -108,9 +108,11 @@ def add_merchant():
 def update_merchant():
     pass
 
-@view_blueprint.route('/delete_merchant/', methods=['DELETE'])
-def delete_merchant():
-    pass
+@view_blueprint.route('/delete_merchant/<merchant_id>', methods=['GET', 'POST'])
+def delete_merchant(merchant_id):
+    merchant = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).delete()
+    db_session.commit()
+    return redirect(url_for('view_blueprint.merchants'))
 
 @view_blueprint.route('/orders/')
 def orders():
