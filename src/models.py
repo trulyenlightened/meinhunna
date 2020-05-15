@@ -67,9 +67,8 @@ class Item(Base):
     """ Database table for Item"""
     __tablename__ = 'items'
     id = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True)
-    merchant_id = sqlalchemy.Column(sqlalchemy.ForeignKey(Merchant.id))
     item_name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
-    unit = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    item_unit = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
 
 class Admin(Base):
     """ Database table for Admin """

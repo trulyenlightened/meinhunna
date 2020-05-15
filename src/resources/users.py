@@ -161,3 +161,90 @@ class GetMerchants(flask_restful.Resource):
         except Exception as ex:
             print(ex)
             flask_restful.abort(400, message="Get Merchants error")
+
+class Order(flask_restful.Resource):
+    @staticmethod
+    @flask_jwt_extended.jwt_required
+    def post():
+        try:
+            me_response = json.loads(request.data.decode('utf-8'))
+            merchant = db_session.query(models.Merchant).filter(models.Merchant.id == me_response['merchant_id']).first()
+
+            create_order = models.Order(user_id=flask_jwt_extended.get_jwt_identity(),
+                                        merchant_id=me_response['merchant_id'],
+                                        boys_id=merchant.boys_id[0],
+                                        items=me_response['items'],
+                                        quantity=me_response['quantity'],
+                                        delivery_id=random.randint(123456, 987654),
+                                        order_address=me_response['order_address'],
+                                        status=models.Delivery_Status.Pending,
+                                        created_at=datetime.datetime.now())
+
+            db_session.add(create_order)
+            db_session.flush()
+        except Exception as e:
+            print(e)
+            return {"message": "something went wrong in creating user"}
+
+        try:
+            db_session.commit()
+            return {
+                'id' : create_order.id,
+                'Order Status': 'Pending'
+            }
+        except SQLAlchemyError as ex:
+            print(ex)
+            db_session.rollback()
+            flask_restful.abort(400, message="Database error")
+
+class NearBy(flask_restful.Resource):
+    @staticmethod
+    @flask_jwt_extended.jwt_required
+    def post():
+        try:
+            result = []
+            me_response = json.loads(request.data.decode('utf-8'))
+            diff = []
+            mer_list = []
+            merchants = db_session.query(models.Merchant).all()
+
+            each_item = []
+            items = db_session.query(models.Item).all()
+            for item in items:
+                each_item.append({
+                    'item_id': item.id,
+                    'item_name': item.item_name,
+                    'item_unit': item.item_unit
+                })
+
+            for merchant in merchants:
+                print(float(merchant.latitude))
+                print(float(me_response['latitude']))
+                diff.append(abs(float(merchant.latitude)-float(me_response['latitude'])))
+                mer_list.append({
+                    "diff": abs(float(merchant.latitude)-float(me_response['latitude'])),
+                    "merchant_array":
+                        {'merchant_id':merchant.id,
+                        'name':merchant.name,
+                        "phone_number":merchant.phone_number,
+                        "latitude":merchant.latitude,
+                        "longitude":merchant.longitude
+                        }
+                })
+
+
+            diff.sort()
+
+            for i in range(len(diff)):
+                for mer in mer_list:
+                    if diff[i] == mer['diff']:
+                        result.append({
+                            "merchant": mer['merchant_array'],
+                            "items": each_item
+                        })
+
+        except Exception as e:
+            print(e)
+            return {"message": "failed to get merchant"}
+
+        return result

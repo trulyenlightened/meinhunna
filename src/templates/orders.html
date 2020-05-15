@@ -72,7 +72,6 @@
 						<h2>Manage <b>Orders</b></h2>
 					</div>
 					<div class="col-sm-6">
-						<a href="#addEmployeeModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Order</span></a>
 						<a href="#deleteEmployeeModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons">&#xE15C;</i> <span>Delete</span></a>
 					</div>
                 </div>
@@ -90,11 +89,9 @@
                         <th>Items</th>
 						<th>Quantity</th>
                         <th>Customer</th>
-                        <th>Latitude</th>
-                        <th>longitude</th>
+                        <th>order_address</th>
                         <th>Delivery_Boy</th>
                         <th>Merchant</th>
-                        <th>Status</th>
                         <th>Datetime</th>
                     </tr>
                 </thead>
@@ -107,13 +104,21 @@
 								<label for="checkbox1"></label>
 							</span>
 						</td>
-                        <td>{{ order.name }}</td>
-                        <td>{{ order.email }}</td>
-						<td>{{ order.address }}</td>
-                        <td>{{ order.phone_number }}</td>
+                        <td>{{ order.id }}</td>
+                        <td>{% for order in order.items %}
+                            {{ order }}<br/>
+                        {% endfor %}</td>
+                        <td>{% for quantity in order.quantity %}
+						    {{ quantity }}<br/>
+                        {% endfor %}</td>
+                        <td>{{ order.user_id }}</td>
+                        <td>{{ order.order_address }}</td>
+                        <td>{{ order.boys_id }}</td>
+                        <td>{{ order.merchant_id }}</td>
+                        <td>{{ order.created_at }}</td>
                         <td>
-                            <a href="#editEmployeeModal" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
-                            <a href="#deleteEmployeeModal" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
+
+                            <a href="{{ url_for('view_blueprint.delete_order', order_id=order.id) }}" onclick="return confirm('Are you sure you want to delete this item?');" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
                         </td>
                     </tr>
                     {% endfor %}
