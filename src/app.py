@@ -34,9 +34,9 @@ def create_app():
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=365)
     app.config['SQLALCHEMY_DATABASE_URI'] = database.uri_string
     app.config['ERROR_404_HELP'] = False
-    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
-    app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
-    app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+    # app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    # app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
+    # app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
     app.debug = False
 
