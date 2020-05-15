@@ -265,8 +265,16 @@ def delete_merchant(merchant_id):
 @jwt_required
 def orders():
     orders = db_session.query(models.Order).all()
+    print(orders[0].items)
     total_order = len(orders)
     return render_template('orders.html', orders=orders, total_order=total_order, title="Orders")
+
+@view_blueprint.route('/delete_order/<order_id>', methods=['GET', 'POST'])
+@jwt_required
+def delete_order(order_id):
+    order = db_session.query(models.Order).filter(models.Order.id == order_id).delete()
+    db_session.commit()
+    return redirect(url_for('view_blueprint.orders'))
 
 @view_blueprint.route('/delivery_boy/')
 @jwt_required

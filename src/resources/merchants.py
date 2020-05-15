@@ -36,10 +36,9 @@ class Merchant(flask_restful.Resource):
             create_merchant = models.Merchant(phone_number=me_response['phone_number'],
                                         name=me_response['name'],
                                         email=me_response['email'],
-                                        address=me_response['address'],
-                                        lat_long=me_response['lat_long'],
+                                        latitude=me_response['latitude'],
+                                        longitude=me_response['longitude'],
                                         boys_id=[me_response['boys_id']],
-                                        password_hash=ph.hash("password"),
                                         created_at=datetime.datetime.now())
 
             db_session.add(create_merchant)
@@ -133,16 +132,12 @@ class OTPSignUpMerchant(flask_restful.Resource):
 
 class Items(flask_restful.Resource):
     @staticmethod
-    @flask_jwt_extended.jwt_required
     def post():
         try:
-            merchant_id = flask_jwt_extended.get_jwt_identity()
             me_response = json.loads(request.data.decode('utf-8'))
             create_item = models.Item(item_name = me_response['item_name'],
-                                        unit = me_response['unit'],
-                                        merchant_id = merchant_id)
+                                        unit = me_response['unit'])
             db_session.add(create_item)
-            db_session.flush()
         except Exception as e:
             print(e)
             return {"message": "exception on add item"}
@@ -150,13 +145,7 @@ class Items(flask_restful.Resource):
         try:
             db_session.commit()
             return {
-                "item_id": create_item.id,
-                "merchant_id": create_item.merchant_id,
-                "items": {
-                    "item_name": create_item.item_name,
-                    "unit": create_item.unit,
                     "message": "success"
-                }
             }
         except Exception as e:
             print(e)

@@ -3,7 +3,7 @@
 from flask import Blueprint, render_template
 from flask_restful import Api
 
-from src.resources.users import User,OTPSignUp,GetMerchants
+from src.resources.users import User,OTPSignUp,GetMerchants,Order,NearBy
 from src.resources.merchants import Merchant,OTPSignUpMerchant,Items,DeliveryBoy
 
 from src.resources.authentication import (JWTDistributor,
@@ -30,6 +30,8 @@ api.add_resource(TokenValidator, '/api/v1/validate/<token>')
 api.add_resource(User, '/api/v1/users')
 api.add_resource(OTPSignUp, '/api/v1/otp')
 api.add_resource(GetMerchants, '/api/v1/users/getmerchant')
+api.add_resource(Order, '/api/v1/users/order')
+api.add_resource(NearBy, '/api/v1/users/nearby')
 
 api.add_resource(Merchant, '/api/v1/merchants')
 api.add_resource(OTPSignUpMerchant, '/api/v1/otpmerchant')
