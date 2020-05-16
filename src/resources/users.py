@@ -11,7 +11,7 @@ import marshmallow
 import json
 import random
 import requests
-# from nose.tools import assert_true
+from nose.tools import assert_true
 import src.models as models
 from src.database import db_session
 
@@ -199,17 +199,13 @@ class Order(flask_restful.Resource):
             flask_restful.abort(400, message="Database error")
 
         try:
-            user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number +"&message=" + "user"
-            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number +"&message=" + "merchant"
-            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number +"&message=" + "DeliveryBoy"
+            user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा&type=3"
+            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा&type=3"
+            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा&type=3"
 
             response1 = requests.get(user_message)
-            print(response1)
             response2 = requests.get(merchant_message)
-            print(response2)
             response3 = requests.get(boy_message)
-            print(response3)
-
             return {
                 'id' : create_order.id,
                 'Order Status': 'Pending'
