@@ -11,7 +11,7 @@ import marshmallow
 import json
 import random
 import requests
-from nose.tools import assert_true
+# from nose.tools import assert_true
 import src.models as models
 from src.database import db_session
 
@@ -117,6 +117,8 @@ class OTPSignUp(flask_restful.Resource):
             me_response = json.loads(request.data.decode('utf-8'))
             phone_number = me_response['phone_number']
             r1 = random.randint(1234, 9876)
+            OTP_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ phone_number + "&language=hindi&message=आपका OTP यह है " + str(r1) + "&type=3"
+            response = requests.get(OTP_message)
             return {
                 "phone_number": phone_number,
                 "OTP": r1,
@@ -174,6 +176,18 @@ class Order(flask_restful.Resource):
             user = db_session.query(models.User).filter(models.User.id == flask_jwt_extended.get_jwt_identity()).first()
             boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == merchant.boys_id[0]).first()
 
+            user_detail = "नाम : "+user.name+"\n"+"पता : "+user.address+"\n"+"फ़ोन नंबर : "+user.phone_number +"\n"
+            b = "नाम : "+boy.name+"\n"+"फ़ोन नंबर : "+boy.phone_number+"\n"
+            m = "नाम : "+merchant.name+"\n"+"फ़ोन नंबर : "+merchant.phone_number+"\n"
+            msg = []
+            for i in range(len(me_response['items'])):
+                msg.append("("+str(i+1)+") "+str(me_response['items'][i])+" "+str(me_response['quantity'][i])+"\n")
+
+            stng = ""
+            for ele in msg:
+                stng += ele
+
+
             create_order = models.Order(user_id=flask_jwt_extended.get_jwt_identity(),
                                         merchant_id=me_response['merchant_id'],
                                         boys_id=merchant.boys_id[0],
@@ -200,10 +214,10 @@ class Order(flask_restful.Resource):
 
         try:
             user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा&type=3"
-            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा&type=3"
-            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा&type=3"
+            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message="+"ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"डिलिवरी बॉय"+"\n"+b+"&type=3"
+            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message=""ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"merchant"+"\n"+m+"&type=3"
 
-            response1 = requests.get(user_message)
+            response1 = requests.get(user_message)नाम पता फ़ोन नंबर
             response2 = requests.get(merchant_message)
             response3 = requests.get(boy_message)
             return {
@@ -213,6 +227,40 @@ class Order(flask_restful.Resource):
         except Exception as e:
             print(e)
             return {"message": "SMS sending failed"}
+
+class Helper():
+    @staticmethod
+    def get_items(a):
+        try:
+            items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
+
+            item_list = []
+            # for item in items:
+            for i, item in enumerate(items):
+                sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id==item.id).all()
+                print(i)
+                item_list.insert(i,{
+                    "item_id": item.id,
+                    "item_name": item.item_name,
+                    "item_unit": item.item_unit,
+                    "sub_items": []
+                })
+
+                print(item_list[i])
+                if sub_items != 0:
+                    for sub_item in sub_items:
+                        # item_list.insert(
+                        item_list[i]["sub_items"].append({
+                            "item_id": sub_item.id,
+                            "item_name": sub_item.item_name,
+                            "item_unit": sub_item.item_unit
+                        })
+            return item_list
+        except Exception as e:
+            print(e)
+            return {"message": "exception at get item"}
+
+helper_obj = Helper()
 
 class NearBy(flask_restful.Resource):
     @staticmethod
@@ -225,15 +273,7 @@ class NearBy(flask_restful.Resource):
             mer_list = []
             merchants = db_session.query(models.Merchant).all()
 
-            each_item = []
-            items = db_session.query(models.Item).all()
-            for item in items:
-                each_item.append({
-                    'item_id': item.id,
-                    'item_name': item.item_name,
-                    'item_unit': item.item_unit
-                })
-
+            each_item = helper_obj.get_items(a="b")
             for merchant in merchants:
                 print(float(merchant.latitude))
                 print(float(me_response['latitude']))
@@ -259,6 +299,7 @@ class NearBy(flask_restful.Resource):
                             "merchant": mer['merchant_array'],
                             "items": each_item
                         })
+
 
         except Exception as e:
             print(e)

@@ -69,6 +69,7 @@ class Item(Base):
     id = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True)
     item_name = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     item_unit = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    sub_category_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
 
 class Admin(Base):
     """ Database table for Admin """

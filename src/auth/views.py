@@ -34,16 +34,18 @@ def index():
 
 @view_blueprint.route('/add_item/')
 def add_item():
-    return render_template('add_item.html')
+    sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
+    return render_template('add_item.html', sub_items=sub_items)
 
 @view_blueprint.route('/add_item_hide/', methods=['POST'])
 def add_item_hide():
     try:
         item_name = request.form['item_name']
         item_unit = request.form['item_unit']
-
+        sub_category_id = request.form['sub_category']
         create_item= models.Item(item_name=item_name,
-                                    item_unit=item_unit)
+                                    item_unit=item_unit,
+                                    sub_category_id=sub_category_id)
         db_session.add(create_item)
         db_session.flush()
 

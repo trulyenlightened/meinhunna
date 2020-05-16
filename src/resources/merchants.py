@@ -152,26 +152,32 @@ class Items(flask_restful.Resource):
             return {"message": "failed to store item"}
 
     @staticmethod
-    @flask_jwt_extended.jwt_required
     def get():
         try:
-            id = flask_jwt_extended.get_jwt_identity()
-            merchant_items = db_session.query(models.Item).filter(models.Item.merchant_id == id).all()
+            items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
 
             item_list = []
-            if len(merchant_items) != 0:
-                for item in merchant_items:
-                    item_list.append({
-                        "merchant_id": item.merchant_id,
-                        "item":{
-                            "item_name": item.item_name,
-                            "unit": item.unit
-                        }
-                    })
-                return item_list
-            else:
-                return {"message": "No such item found"}
+            # for item in items:
+            for i, item in enumerate(items):
+                sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id==item.id).all()
+                print(i)
+                item_list.insert(i,{
+                    "item_id": item.id,
+                    "item_name": item.item_name,
+                    "item_unit": item.item_unit,
+                    "sub_items": []
+                })
 
+                print(item_list[i])
+                if sub_items != 0:
+                    for sub_item in sub_items:
+                        # item_list.insert(
+                        item_list[i]["sub_items"].append({
+                            "item_id": sub_item.id,
+                            "item_name": sub_item.item_name,
+                            "item_unit": sub_item.item_unit
+                        })
+            return item_list
         except Exception as e:
             print(e)
             return {"message": "exception at get item"}
