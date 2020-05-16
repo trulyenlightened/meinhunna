@@ -217,7 +217,7 @@ class Order(flask_restful.Resource):
             merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message="+"ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"डिलिवरी बॉय"+"\n"+b+"&type=3"
             boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message=""ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"merchant"+"\n"+m+"&type=3"
 
-            response1 = requests.get(user_message)नाम पता फ़ोन नंबर
+            response1 = requests.get(user_message)
             response2 = requests.get(merchant_message)
             response3 = requests.get(boy_message)
             return {
