@@ -13,6 +13,7 @@ import random
 import requests
 # from nose.tools import assert_true
 import src.models as models
+from math import radians, cos, sin, asin, sqrt
 from src.database import db_session
 
 ph = PasswordHasher(hash_len=64, salt_len=32)
@@ -260,6 +261,29 @@ class Helper():
             print(e)
             return {"message": "exception at get item"}
 
+    @staticmethod
+    def distance(lat1, lat2, lon1, lon2):
+
+        # The math module contains a function named
+        # radians which converts from degrees to radians.
+        lon1 = radians(lon1)
+        lon2 = radians(lon2)
+        lat1 = radians(lat1)
+        lat2 = radians(lat2)
+
+        # Haversine formula
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+
+        c = 2 * asin(sqrt(a))
+
+        # Radius of earth in kilometers. Use 3956 for miles
+        r = 6371
+
+        # calculate the result
+        return(c * r)
+
 helper_obj = Helper()
 
 class NearBy(flask_restful.Resource):
@@ -274,12 +298,16 @@ class NearBy(flask_restful.Resource):
             merchants = db_session.query(models.Merchant).all()
 
             each_item = helper_obj.get_items(a="b")
+
             for merchant in merchants:
-                print(float(merchant.latitude))
-                print(float(me_response['latitude']))
-                diff.append(abs(float(merchant.latitude)-float(me_response['latitude'])))
+                lat1 = float(me_response['latitude'])
+                lat2 = float(merchant.latitude)
+                lon1 = float(me_response['longitude'])
+                lon2 = float(merchant.longitude)
+                difference = helper_obj.distance(lat1, lat2, lon1, lon2)
+                diff.append(difference)
                 mer_list.append({
-                    "diff": abs(float(merchant.latitude)-float(me_response['latitude'])),
+                    "diff": difference,
                     "merchant_array":
                         {'merchant_id':merchant.id,
                         'name':merchant.name,
@@ -288,16 +316,16 @@ class NearBy(flask_restful.Resource):
                         "longitude":merchant.longitude
                         }
                 })
-
-
             diff.sort()
+            print(diff)
 
             for i in range(len(diff)):
                 for mer in mer_list:
                     if diff[i] == mer['diff']:
                         result.append({
                             "merchant": mer['merchant_array'],
-                            "items": each_item
+                            "items": each_item,
+                            "diff": diff[i]
                         })
 
 
