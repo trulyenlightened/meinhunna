@@ -33,20 +33,17 @@ def index():
     return render_template('index.html')
 
 @view_blueprint.route('/update_user_uri/<user_id>', methods=['GET', 'POST'])
-@jwt_required
 def update_user_uri(user_id):
     users = db_session.query(models.User).filter(models.User.id == user_id).all()
     return render_template('update_user.html', title="Update User", users=users)
 
 @view_blueprint.route('/update_merchant_uri/<merchant_id>', methods=['GET', 'POST'])
-@jwt_required
 def update_merchant_uri(merchant_id):
     merchants = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).all()
     boys = db_session.query(models.Delivery_Boy).all()
     return render_template('update_merchant.html', title="Update Merchant", merchants=merchants, boys=boys)
 
 @view_blueprint.route('/update_boy_uri/<boy_id>', methods=['GET', 'POST'])
-@jwt_required
 def update_boy_uri(boy_id):
     boys = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).all()
     return render_template('update_delivery_boy.html', title="Update boys", boys=boys)
@@ -56,7 +53,6 @@ def admin():
     return render_template('admin_login.html', title="Admin Login")
 
 @view_blueprint.route('/admin_logout/', methods=['POST'])
-@jwt_required
 def logout():
     res = redirect(url_for('view_blueprint.index'))
     unset_jwt_cookies(res)
@@ -78,7 +74,7 @@ def admin_login():
         access_token = create_access_token(identity=name)
 
         resp = redirect(url_for('view_blueprint.users'))
-        set_access_cookies(resp, access_token)
+        # set_access_cookies(resp, access_token)
     except Exception as e:
         print(e)
         return {"message": "Admin Verification Failed"}
@@ -86,14 +82,12 @@ def admin_login():
     return resp
 
 @view_blueprint.route('/users/')
-@jwt_required
 def users():
     users = db_session.query(models.User).all()
     total_user = len(users)
     return render_template('users.html', users=users, total_user=total_user, title="Users")
 
 @view_blueprint.route('/add_user/', methods=['POST'])
-@jwt_required
 def add_user():
     try:
         name = request.form['name']
@@ -125,7 +119,6 @@ def add_user():
     return redirect(url_for('view_blueprint.users'))
 
 @view_blueprint.route('/update_user/', methods=['POST'])
-@jwt_required
 def update_user():
     try:
         name = request.form['name']
@@ -160,14 +153,12 @@ def update_user():
 
 
 @view_blueprint.route('/delete_user/<user_id>', methods=['GET', 'POST'])
-@jwt_required
 def delete_user(user_id):
     user = db_session.query(models.User).filter(models.User.id == user_id).delete()
     db_session.commit()
     return redirect(url_for('view_blueprint.users'))
 
 @view_blueprint.route('/merchants/')
-@jwt_required
 def merchants():
     merchants = db_session.query(models.Merchant).all()
     boys = db_session.query(models.Delivery_Boy).all()
@@ -175,7 +166,6 @@ def merchants():
     return render_template('merchants.html', merchants=merchants, total_merchant=total_merchant, boys=boys, title="Merchants")
 
 @view_blueprint.route('/add_merchant/', methods=['POST'])
-@jwt_required
 def add_merchant():
     try:
         name = request.form['name']
@@ -213,7 +203,6 @@ def add_merchant():
 
 
 @view_blueprint.route('/update_merchant/', methods=['POST'])
-@jwt_required
 def update_merchant():
     try:
         name = request.form['name']
@@ -256,14 +245,12 @@ def update_merchant():
 
 
 @view_blueprint.route('/delete_merchant/<merchant_id>', methods=['GET', 'POST'])
-@jwt_required
 def delete_merchant(merchant_id):
     merchant = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).delete()
     db_session.commit()
     return redirect(url_for('view_blueprint.merchants'))
 
 @view_blueprint.route('/orders/')
-@jwt_required
 def orders():
     orders = db_session.query(models.Order).all()
     print(orders[0].items)
@@ -271,21 +258,18 @@ def orders():
     return render_template('orders.html', orders=orders, total_order=total_order, title="Orders")
 
 @view_blueprint.route('/delete_order/<order_id>', methods=['GET', 'POST'])
-@jwt_required
 def delete_order(order_id):
     order = db_session.query(models.Order).filter(models.Order.id == order_id).delete()
     db_session.commit()
     return redirect(url_for('view_blueprint.orders'))
 
 @view_blueprint.route('/delivery_boy/')
-@jwt_required
 def delivery_boy():
     boys = db_session.query(models.Delivery_Boy).all()
     total_boy = len(boys)
     return render_template('delivery_boy.html', boys=boys, total_boy=total_boy, title="Delivery_Boy")
 
 @view_blueprint.route('/add_boy/', methods=['POST'])
-@jwt_required
 def add_boy():
     try:
         name = request.form['name']
@@ -313,7 +297,6 @@ def add_boy():
     return redirect(url_for('view_blueprint.delivery_boy'))
 
 @view_blueprint.route('/update_boy/', methods=['POST'])
-@jwt_required
 def update_boy():
     try:
         name = request.form['name']
@@ -343,7 +326,6 @@ def update_boy():
 
 
 @view_blueprint.route('/delete_boy/<boy_id>', methods=['GET', 'POST'])
-@jwt_required
 def delete_boy(boy_id):
     boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).delete()
     db_session.commit()

@@ -10,7 +10,8 @@ import flask_restful
 import marshmallow
 import json
 import random
-
+import requests
+# from nose.tools import assert_true
 import src.models as models
 from src.database import db_session
 
@@ -168,7 +169,10 @@ class Order(flask_restful.Resource):
     def post():
         try:
             me_response = json.loads(request.data.decode('utf-8'))
+
             merchant = db_session.query(models.Merchant).filter(models.Merchant.id == me_response['merchant_id']).first()
+            user = db_session.query(models.User).filter(models.User.id == flask_jwt_extended.get_jwt_identity()).first()
+            boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == merchant.boys_id[0]).first()
 
             create_order = models.Order(user_id=flask_jwt_extended.get_jwt_identity(),
                                         merchant_id=me_response['merchant_id'],
@@ -188,14 +192,31 @@ class Order(flask_restful.Resource):
 
         try:
             db_session.commit()
-            return {
-                'id' : create_order.id,
-                'Order Status': 'Pending'
-            }
+
         except SQLAlchemyError as ex:
             print(ex)
             db_session.rollback()
             flask_restful.abort(400, message="Database error")
+
+        try:
+            user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number +"&message=" + "user"
+            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number +"&message=" + "merchant"
+            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number +"&message=" + "DeliveryBoy"
+
+            response1 = requests.get(user_message)
+            print(response1)
+            response2 = requests.get(merchant_message)
+            print(response2)
+            response3 = requests.get(boy_message)
+            print(response3)
+
+            return {
+                'id' : create_order.id,
+                'Order Status': 'Pending'
+            }
+        except Exception as e:
+            print(e)
+            return {"message": "SMS sending failed"}
 
 class NearBy(flask_restful.Resource):
     @staticmethod
