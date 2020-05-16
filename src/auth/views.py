@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request,flash
 from src.database import db_session
 import src.models as models
 from datetime import datetime
@@ -31,6 +31,33 @@ def jwt_required(fn):
 @view_blueprint.route('/dashboard/')
 def index():
     return render_template('index.html')
+
+@view_blueprint.route('/add_item/')
+def add_item():
+    return render_template('add_item.html')
+
+@view_blueprint.route('/add_item_hide/', methods=['POST'])
+def add_item_hide():
+    try:
+        item_name = request.form['item_name']
+        item_unit = request.form['item_unit']
+
+        create_item= models.Item(item_name=item_name,
+                                    item_unit=item_unit)
+        db_session.add(create_item)
+        db_session.flush()
+
+    except Exception as e:
+        print(e)
+        return {"message": "something went wrong in creating user"}
+
+    try:
+        db_session.commit()
+        flash('Item successfully added')
+        return render_template('add_item.html')
+    except Exception as e:
+        print(e)
+        return {"message": "something went wrong in creating user"}
 
 @view_blueprint.route('/update_user_uri/<user_id>', methods=['GET', 'POST'])
 def update_user_uri(user_id):
