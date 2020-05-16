@@ -50,7 +50,7 @@ def start_app():
     Starts the app, binding to all hosts.
     """
     app = create_app()
-    app.run(0.0.0.0) #host='0.0.0.0' for pord
+    app.run('0.0.0.0') #host='0.0.0.0' for pord
 
 
 if __name__ == '__main__':
