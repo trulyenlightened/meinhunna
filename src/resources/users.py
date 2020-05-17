@@ -285,6 +285,7 @@ class NearBy(flask_restful.Resource):
             if me_response['latitude'] == None and me_response['longitude'] == None:
                 for merchant in merchants:
                     result.append({
+                        "diff": None,
                         "merchant": {
                             "merchant_id": merchant.id,
                             "name": merchant.name,
@@ -292,8 +293,8 @@ class NearBy(flask_restful.Resource):
                             "latitude": merchant.latitude,
                             "longitude": merchant.longitude
                             },
-                        "items": each_item,
-                        "diff": None
+                        "items": each_item
+
                     })
             else:
                 for merchant in merchants:
@@ -305,7 +306,7 @@ class NearBy(flask_restful.Resource):
 
                     result.append({
                         "diff": difference,
-                        "merchant_array": {
+                        "merchant": {
                             "merchant_id": merchant.id,
                             "name": merchant.name,
                             "phone_number": merchant.phone_number,
