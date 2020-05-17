@@ -33,6 +33,8 @@ class User(flask_restful.Resource):
     def post():
         try:
             me_response = json.loads(request.data.decode('utf-8'))
+            print(me_response['password'])
+            print(ph.hash("password"))
             create_user = models.User(phone_number=me_response['phone_number'],
                                         name=me_response['name'],
                                         email=me_response['email'],
