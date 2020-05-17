@@ -11,7 +11,6 @@ import marshmallow
 import json
 import random
 import requests
-# from nose.tools import assert_true
 import src.models as models
 from math import radians, cos, sin, asin, sqrt
 from src.database import db_session
@@ -33,13 +32,11 @@ class User(flask_restful.Resource):
     def post():
         try:
             me_response = json.loads(request.data.decode('utf-8'))
-            print(me_response['password'])
-            print(ph.hash("password"))
             create_user = models.User(phone_number=me_response['phone_number'],
                                         name=me_response['name'],
                                         email=me_response['email'],
                                         address=me_response['address'],
-                                        password_hash=ph.hash("password"),
+                                        password_hash=ph.hash(me_response["password"]),
                                         created_at=datetime.datetime.now())
 
             db_session.add(create_user)
@@ -48,16 +45,16 @@ class User(flask_restful.Resource):
             print(e)
             return {"message": "something went wrong in creating user"}
 
-        access_token = flask_jwt_extended.create_access_token(identity=create_user.id)
         try:
             db_session.commit()
+            count = db_session.query(models.User).count()
             return {
-                'access_token': access_token,
                 'user': {
-                    'id' : create_user.id,
+                    'id': create_user.id,
+                    'user_count': count,
                     'message': 'user successfully stored in database',
                     'Status': True
-                },
+                }
             }
         except SQLAlchemyError as ex:
             print(ex)
@@ -88,19 +85,24 @@ class User(flask_restful.Resource):
         if 'name' in json_data.keys():
             user.name = json_data['name']
 
+        if 'email' in json_data.keys():
+            user.email = json_data['email']
+
         if 'address' in json_data.keys():
             user.address = json_data['address']
 
-        if 'password' in json_data.keys():
-            password_hash = ph.hash(json_data['password'])
-            user.password_hash = password_hash
+        if 'phone_number' in json_data.keys():
+            user.phone_number = json_data['phone_number']
 
         try:
             db_session.commit()
             return {
                 'user': {
-                    'id': user.id,
-                    'name': user.name,
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email,
+                    "address": user.address,
+                    "phone_number": user.phone_number,
                     "created_at": user.created_at.isoformat()
                 }
             }
@@ -119,6 +121,12 @@ class OTPSignUp(flask_restful.Resource):
         try:
             me_response = json.loads(request.data.decode('utf-8'))
             phone_number = me_response['phone_number']
+
+            user = db_session.query(models.User).filter(models.User.phone_number == phone_number).one()
+            if user is not None:
+                return {
+                    "message": "phone number is already registered"
+                }
             r1 = random.randint(1234, 9876)
             OTP_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ phone_number + "&language=hindi&message=आपका OTP यह है " + str(r1) + "&type=3"
             response = requests.get(OTP_message)
@@ -144,11 +152,9 @@ class GetMerchants(flask_restful.Resource):
             if len(merchants) != 0:
                 for merchant in merchants:
                     boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == merchant.boys_id[0]).first()
-                    # if boy is not None:
-                        # pass
                     merchants_list.append({
                         "merchant_id": merchant.id,
-                        "merchant":{
+                        "merchant": {
                             "name": merchant.name,
                             "phone_number": merchant.phone_number,
                             "email": merchant.email,
@@ -179,7 +185,12 @@ class Order(flask_restful.Resource):
             user = db_session.query(models.User).filter(models.User.id == flask_jwt_extended.get_jwt_identity()).first()
             boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == merchant.boys_id[0]).first()
 
-            user_detail = "नाम : "+user.name+"\n"+"पता : "+user.address+"\n"+"फ़ोन नंबर : "+user.phone_number +"\n"
+            if me_response['order_address'] == "":
+                address = user.address
+            else:
+                address = me_response['order_address']
+
+            user_detail = "नाम : "+user.name+"\n"+"पता : "+address+"\n"+"फ़ोन नंबर : "+user.phone_number +"\n"
             b = "नाम : "+boy.name+"\n"+"फ़ोन नंबर : "+boy.phone_number+"\n"
             m = "नाम : "+merchant.name+"\n"+"फ़ोन नंबर : "+merchant.phone_number+"\n"
             msg = []
@@ -190,14 +201,13 @@ class Order(flask_restful.Resource):
             for ele in msg:
                 stng += ele
 
-
             create_order = models.Order(user_id=flask_jwt_extended.get_jwt_identity(),
                                         merchant_id=me_response['merchant_id'],
                                         boys_id=merchant.boys_id[0],
                                         items=me_response['items'],
                                         quantity=me_response['quantity'],
                                         delivery_id=random.randint(123456, 987654),
-                                        order_address=me_response['order_address'],
+                                        order_address=address,
                                         status=models.Delivery_Status.Pending,
                                         created_at=datetime.datetime.now())
 
@@ -216,9 +226,9 @@ class Order(flask_restful.Resource):
             flask_restful.abort(400, message="Database error")
 
         try:
-            user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा&type=3"
-            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message="+"ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"डिलिवरी बॉय"+"\n"+b+"&type=3"
-            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message=""ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"merchant"+"\n"+m+"&type=3"
+            user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा"+"\n"+"आर्डर नंबर "+str(create_order.id)+"&type=3"
+            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message="+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"डिलिवरी बॉय"+"\n"+b+"&type=3"
+            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message="+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"merchant"+"\n"+m+"&type=3"
 
             response1 = requests.get(user_message)
             response2 = requests.get(merchant_message)
