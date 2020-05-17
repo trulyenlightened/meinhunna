@@ -234,23 +234,18 @@ class Helper():
     def get_items(a):
         try:
             items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
-
             item_list = []
-            # for item in items:
+
             for i, item in enumerate(items):
                 sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id==item.id).all()
-                print(i)
                 item_list.insert(i,{
                     "item_id": item.id,
                     "item_name": item.item_name,
                     "item_unit": item.item_unit,
                     "sub_items": []
                 })
-
-                print(item_list[i])
                 if sub_items != 0:
                     for sub_item in sub_items:
-                        # item_list.insert(
                         item_list[i]["sub_items"].append({
                             "item_id": sub_item.id,
                             "item_name": sub_item.item_name,
@@ -263,24 +258,15 @@ class Helper():
 
     @staticmethod
     def distance(lat1, lat2, lon1, lon2):
-
         # The math module contains a function named
         # radians which converts from degrees to radians.
-        lon1 = radians(lon1)
-        lon2 = radians(lon2)
-        lat1 = radians(lat1)
-        lat2 = radians(lat2)
-
         # Haversine formula
-        dlon = lon2 - lon1
-        dlat = lat2 - lat1
+        dlon = radians(lon2) - radians(lon1)
+        dlat = radians(lat2) - radians(lat1)
         a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-
         c = 2 * asin(sqrt(a))
-
         # Radius of earth in kilometers. Use 3956 for miles
         r = 6371
-
         # calculate the result
         return(c * r)
 
@@ -291,43 +277,45 @@ class NearBy(flask_restful.Resource):
     @flask_jwt_extended.jwt_required
     def post():
         try:
-            result = []
             me_response = json.loads(request.data.decode('utf-8'))
-            diff = []
-            mer_list = []
             merchants = db_session.query(models.Merchant).all()
-
             each_item = helper_obj.get_items(a="b")
+            result = []
 
-            for merchant in merchants:
-                lat1 = float(me_response['latitude'])
-                lat2 = float(merchant.latitude)
-                lon1 = float(me_response['longitude'])
-                lon2 = float(merchant.longitude)
-                difference = helper_obj.distance(lat1, lat2, lon1, lon2)
-                diff.append(difference)
-                mer_list.append({
-                    "diff": difference,
-                    "merchant_array":
-                        {'merchant_id':merchant.id,
-                        'name':merchant.name,
-                        "phone_number":merchant.phone_number,
-                        "latitude":merchant.latitude,
-                        "longitude":merchant.longitude
-                        }
-                })
-            diff.sort()
-            print(diff)
+            if me_response['latitude'] == None and me_response['longitude'] == None:
+                for merchant in merchants:
+                    result.append({
+                        "merchant": {
+                            "merchant_id": merchant.id,
+                            "name": merchant.name,
+                            "phone_number": merchant.phone_number,
+                            "latitude": merchant.latitude,
+                            "longitude": merchant.longitude
+                            },
+                        "items": each_item,
+                        "diff": None
+                    })
+            else:
+                for merchant in merchants:
+                    lat1 = float(me_response['latitude'])
+                    lat2 = float(merchant.latitude)
+                    lon1 = float(me_response['longitude'])
+                    lon2 = float(merchant.longitude)
+                    difference = helper_obj.distance(lat1, lat2, lon1, lon2)
 
-            for i in range(len(diff)):
-                for mer in mer_list:
-                    if diff[i] == mer['diff']:
-                        result.append({
-                            "merchant": mer['merchant_array'],
-                            "items": each_item,
-                            "diff": diff[i]
-                        })
+                    result.append({
+                        "diff": difference,
+                        "merchant_array": {
+                            "merchant_id": merchant.id,
+                            "name": merchant.name,
+                            "phone_number": merchant.phone_number,
+                            "latitude": merchant.latitude,
+                            "longitude": merchant.longitude
+                            },
+                        "items": each_item
+                    })
 
+                result.sort(key=lambda item: item.get("diff"))
 
         except Exception as e:
             print(e)
