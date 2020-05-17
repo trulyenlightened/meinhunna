@@ -85,6 +85,7 @@
 								<label for="selectAll"></label>
 							</span>
 						</th>
+                        <th>Id</th>
                         <th>Name</th>
                         <th>Phone</th>
                         <th>Email</th>
@@ -100,6 +101,7 @@
 								<label for="checkbox1"></label>
 							</span>
 						</td>
+                        <td>{{ loop.index }}</td>
                         <td>{{ boy.name }}</td>
                         <td>{{ boy.phone_number }}</td>
                         {% if boy.email == "" %}

@@ -105,7 +105,7 @@
 								<label for="checkbox1"></label>
 							</span>
 						</td>
-                        <td>{{ order[1].id }}</td>
+                        <td>{{ loop.index }}</td>
                         <td>{% for order in order[1].items %}
                             {{ order }}<br/>
                         {% endfor %}</td>

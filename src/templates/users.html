@@ -85,6 +85,7 @@
 								<label for="selectAll"></label>
 							</span>
 						</th>
+                        <th>Id</th>
                         <th>Name</th>
                         <th>Email</th>
 						<th>Address</th>
@@ -101,6 +102,7 @@
 								<label for="checkbox1"></label>
 							</span>
 						</td>
+                        <td>{{ loop.index }}</td>
                         <td>{{ user.name }}</td>
                         <td>{{ user.email }}</td>
 						<td>{{ user.address }}</td>
