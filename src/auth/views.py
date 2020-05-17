@@ -58,8 +58,7 @@ def add_item_hide():
     try:
         db_session.commit()
         flash('Item successfully added')
-        sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
-        return render_template('add_item.html', sub_items=sub_items)
+        return redirect(url_for('view_blueprint.add_item'))
     except Exception as e:
         print(e)
         return {"message": "something went wrong in creating user"}
