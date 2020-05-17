@@ -37,7 +37,7 @@ class User(flask_restful.Resource):
                                         name=me_response['name'],
                                         email=me_response['email'],
                                         address=me_response['address'],
-                                        password_hash=ph.hash("password"),
+                                        password_hash=ph.hash(me_response["password"]),
                                         created_at=datetime.datetime.now())
 
             db_session.add(create_user)
