@@ -58,7 +58,7 @@ def add_item_hide():
     try:
         db_session.commit()
         flash('Item successfully added')
-        return render_template('add_item.html')
+        return redirect(url_for('view_blueprint.add_item'))
     except Exception as e:
         print(e)
         return {"message": "something went wrong in creating user"}
