@@ -72,7 +72,7 @@
 					</div>
 					<div class="col-sm-6">
 						<a href="#addEmployeeModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Boy</span></a>
-						<a href="#deleteEmployeeModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons">&#xE15C;</i> <span>Delete</span></a>
+						<!-- <a href="#deleteEmployeeModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons">&#xE15C;</i> <span>Delete</span></a> -->
 					</div>
                 </div>
             </div>
@@ -119,21 +119,7 @@
                 </tbody>
             </table>
 			<div class="clearfix">
-                {% if total_boy > 5 %}
-                    <div class="hint-text">Showing <b>5</b> out of <b>{{ total_boy }}</b> entries</div>
-                {% else %}
-                    <div class="hint-text">Showing <b>{{ total_boy }}</b> out of <b>{{ total_boy }}</b> entries</div>
-                {% endif %}
-
-                <ul class="pagination">
-                    <li class="page-item disabled"><a href="#">Previous</a></li>
-                    <li class="page-item active"><a href="#" class="page-link">1</a></li>
-                    <li class="page-item"><a href="#" class="page-link">2</a></li>
-                    <li class="page-item"><a href="#" class="page-link">3</a></li>
-                    <li class="page-item"><a href="#" class="page-link">4</a></li>
-                    <li class="page-item"><a href="#" class="page-link">5</a></li>
-                    <li class="page-item"><a href="#" class="page-link">Next</a></li>
-                </ul>
+                <div class="hint-text">Showing <b>{{ total_boy }}</b> out of <b>{{ total_boy }}</b> entries</div>
             </div>
         </div>
     </div>

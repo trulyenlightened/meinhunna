@@ -202,9 +202,6 @@ def add_merchant():
         latitude = request.form['latitude']
         longitude = request.form['longitude']
         boys_id = request.form['delivery-boys']
-        print("--------------")
-        print(boys_id)
-        print("--------------")
         phone_number = request.form['phone_number']
 
         create_merchant = models.Merchant(phone_number=phone_number,
@@ -279,17 +276,24 @@ def delete_merchant(merchant_id):
     return redirect(url_for('view_blueprint.merchants'))
 
 @view_blueprint.route('/orders/')
-def orders():
-    orders = db_session.query(models.Order).all()
-    print(orders[0].items)
+def orders(delete=None):
+    orders = db_session.query(models.User, models.Order, models.Merchant, models.Delivery_Boy).filter(models.User.id == models.Order.user_id).filter(models.Merchant.id == models.Order.merchant_id).filter(models.Delivery_Boy.id == models.Order.boys_id).all()
     total_order = len(orders)
+    if request.args.get('delete') == "success":
+        flash('Delete Entry Success')
+    elif request.args.get('delete') == "fail":
+        flash('Delete Entry Failed')
     return render_template('orders.html', orders=orders, total_order=total_order, title="Orders")
 
 @view_blueprint.route('/delete_order/<order_id>', methods=['GET', 'POST'])
 def delete_order(order_id):
-    order = db_session.query(models.Order).filter(models.Order.id == order_id).delete()
-    db_session.commit()
-    return redirect(url_for('view_blueprint.orders'))
+    try:
+        order = db_session.query(models.Order).filter(models.Order.id == order_id).delete()
+        db_session.commit()
+    except Exception as e:
+        print(e)
+        return redirect(url_for('view_blueprint.orders', delete="fail"))
+    return redirect(url_for('view_blueprint.orders', delete="success"))
 
 @view_blueprint.route('/delivery_boy/')
 def delivery_boy():

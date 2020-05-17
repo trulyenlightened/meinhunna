@@ -55,6 +55,7 @@
             <div class="form-group">
                 <label for="sub_category">sub_item</label>
                 <select id="sub_category" name="sub_category">
+                    <option value="" name="sub_category"> - </option>
                     {% for sub_item in sub_items %}
                         <option value="{{ sub_item.id }}" name="sub_category">{{ sub_item.item_name }}</option>
                     {% endfor %}
