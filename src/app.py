@@ -38,7 +38,7 @@ def create_app():
     # app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
     # app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
-    app.debug = True
+    app.debug = False
 
     JWTManager(app)
 
@@ -50,7 +50,7 @@ def start_app():
     Starts the app, binding to all hosts.
     """
     app = create_app()
-    app.run() #host='0.0.0.0' for pord
+    app.run('0.0.0.0') #host='0.0.0.0' for pord
 
 
 if __name__ == '__main__':
