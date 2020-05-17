@@ -43,6 +43,8 @@ def add_item_hide():
         item_name = request.form['item_name']
         item_unit = request.form['item_unit']
         sub_category_id = request.form['sub_category']
+        if sub_category_id == "None":
+            sub_category_id = None
         create_item= models.Item(item_name=item_name,
                                     item_unit=item_unit,
                                     sub_category_id=sub_category_id)
