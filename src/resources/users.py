@@ -122,7 +122,8 @@ class OTPSignUp(flask_restful.Resource):
             me_response = json.loads(request.data.decode('utf-8'))
             phone_number = me_response['phone_number']
 
-            user = db_session.query(models.User).filter(models.User.phone_number == phone_number).one()
+            user = db_session.query(models.User).filter(models.User.phone_number == phone_number).one_or_none()
+            print(user)
             if user is not None:
                 return {
                     "message": "phone number is already registered"
@@ -190,7 +191,7 @@ class Order(flask_restful.Resource):
             else:
                 address = me_response['order_address']
 
-            user_detail = "नाम : "+user.name+"\n"+"पता : "+address+"\n"+"फ़ोन नंबर : "+user.phone_number +"\n"
+            u = "नाम : "+user.name+"\n"+"पता : "+address+"\n"+"फ़ोन नंबर : "+user.phone_number +"\n"
             b = "नाम : "+boy.name+"\n"+"फ़ोन नंबर : "+boy.phone_number+"\n"
             m = "नाम : "+merchant.name+"\n"+"फ़ोन नंबर : "+merchant.phone_number+"\n"
             msg = []
@@ -227,8 +228,8 @@ class Order(flask_restful.Resource):
 
         try:
             user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा"+"\n"+"आर्डर नंबर "+str(create_order.id)+"&type=3"
-            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message="+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"डिलिवरी बॉय"+"\n"+b+"&type=3"
-            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message="+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"ग्राहक का नाम और पता"+"\n"+user_detail+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"merchant"+"\n"+m+"&type=3"
+            merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message="+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"ग्राहक का नाम और पता"+"\n"+u+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"डिलिवरी बॉय"+"\n"+b+"&type=3"
+            boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message="+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"ग्राहक का नाम और पता"+"\n"+u+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"merchant"+"\n"+m+"&type=3"
 
             response1 = requests.get(user_message)
             response2 = requests.get(merchant_message)
