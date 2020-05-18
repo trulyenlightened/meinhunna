@@ -138,6 +138,7 @@ class Items(flask_restful.Resource):
             create_item = models.Item(item_name = me_response['item_name'],
                                         unit = me_response['unit'])
             db_session.add(create_item)
+            db_session.flush()
         except Exception as e:
             print(e)
             return {"message": "exception on add item"}
