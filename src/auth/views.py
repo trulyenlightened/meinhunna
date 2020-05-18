@@ -28,10 +28,49 @@ def jwt_required(fn):
         return fn(*args, **kwargs)
     return wrapper
 
+"""
+Template for Dashboard
+"""
 @view_blueprint.route('/dashboard/')
 def index():
     return render_template('index.html')
 
+"""
+Template for Admin
+"""
+@view_blueprint.route('/admin/')
+def admin():
+    return render_template('admin_login.html', title="Admin Login")
+
+@view_blueprint.route('/admin_logout/', methods=['POST'])
+def logout():
+    res = redirect(url_for('view_blueprint.index'))
+    unset_jwt_cookies(res)
+    return res
+
+@view_blueprint.route('/admin_login/', methods=['POST'])
+def admin_login():
+    name = request.form['name']
+    password = request.form['password']
+
+    admin = db_session.query(models.Admin).filter(models.Admin.name == name).one_or_none()
+    if admin is None:
+        return {"message": "Admin Not Available"}
+
+    try:
+        ph.verify(admin.password_hash, password)
+        access_token = create_access_token(identity=name)
+        resp = redirect(url_for('view_blueprint.users'))
+        # set_access_cookies(resp, access_token)
+    except Exception as e:
+        print(e)
+        return {"message": "Admin Verification Failed"}
+
+    return resp
+
+"""
+Template for Items
+"""
 @view_blueprint.route('/add_item/')
 def add_item():
     sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
@@ -45,7 +84,7 @@ def add_item_hide():
         sub_category_id = request.form['sub_category']
         if sub_category_id == "None":
             sub_category_id = None
-        create_item= models.Item(item_name=item_name,
+        create_item = models.Item(item_name=item_name,
                                     item_unit=item_unit,
                                     sub_category_id=sub_category_id)
         db_session.add(create_item)
@@ -53,65 +92,20 @@ def add_item_hide():
 
     except Exception as e:
         print(e)
-        return {"message": "something went wrong in creating user"}
-
+        return {"message": "Add item failed"}
     try:
         db_session.commit()
         flash('Item successfully added')
         return redirect(url_for('view_blueprint.add_item'))
+        
     except Exception as e:
         print(e)
-        return {"message": "something went wrong in creating user"}
+        flash('Item failed to add')
+        return redirect(url_for('view_blueprint.add_item'))
 
-@view_blueprint.route('/update_user_uri/<user_id>', methods=['GET', 'POST'])
-def update_user_uri(user_id):
-    users = db_session.query(models.User).filter(models.User.id == user_id).all()
-    return render_template('update_user.html', title="Update User", users=users)
-
-@view_blueprint.route('/update_merchant_uri/<merchant_id>', methods=['GET', 'POST'])
-def update_merchant_uri(merchant_id):
-    merchants = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).all()
-    boys = db_session.query(models.Delivery_Boy).all()
-    return render_template('update_merchant.html', title="Update Merchant", merchants=merchants, boys=boys)
-
-@view_blueprint.route('/update_boy_uri/<boy_id>', methods=['GET', 'POST'])
-def update_boy_uri(boy_id):
-    boys = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).all()
-    return render_template('update_delivery_boy.html', title="Update boys", boys=boys)
-
-@view_blueprint.route('/admin/')
-def admin():
-    return render_template('admin_login.html', title="Admin Login")
-
-@view_blueprint.route('/admin_logout/', methods=['POST'])
-def logout():
-    res = redirect(url_for('view_blueprint.index'))
-    unset_jwt_cookies(res)
-    return res
-
-
-@view_blueprint.route('/admin_login/', methods=['POST'])
-def admin_login():
-    name = request.form['name']
-    password = request.form['password']
-
-    admin = db_session.query(models.Admin).filter(models.Admin.name == name).one_or_none()
-    if admin is None:
-        return {"message": "Admin Not Available"}
-
-    try:
-        ph.verify(admin.password_hash, password)
-
-        access_token = create_access_token(identity=name)
-
-        resp = redirect(url_for('view_blueprint.users'))
-        # set_access_cookies(resp, access_token)
-    except Exception as e:
-        print(e)
-        return {"message": "Admin Verification Failed"}
-
-    return resp
-
+"""
+Template for Users
+"""
 @view_blueprint.route('/users/')
 def users():
     users = db_session.query(models.User).all()
@@ -139,15 +133,21 @@ def add_user():
     except Exception as e:
         print(e)
         return {"message": "something went wrong in creating user"}
-
     try:
         db_session.commit()
+        flash('New User successfully added')
 
     except Exception as e:
         print(e)
-        return {"message": "something went wrong in creating user"}
+        flash('New User failed to add')
+        return redirect(url_for('view_blueprint.users'))
 
     return redirect(url_for('view_blueprint.users'))
+
+@view_blueprint.route('/update_user_uri/<user_id>', methods=['GET', 'POST'])
+def update_user_uri(user_id):
+    users = db_session.query(models.User).filter(models.User.id == user_id).all()
+    return render_template('update_user.html', title="Update User", users=users)
 
 @view_blueprint.route('/update_user/', methods=['POST'])
 def update_user():
@@ -167,28 +167,37 @@ def update_user():
         user.address = new_address
         user.phone_number = new_phone_number
 
-
     except Exception as e:
         print(e)
         return {"message": "user Update Adding failed"}
     try:
         db_session.commit()
+        flash('Update User success')
 
     except Exception as e:
         print(e)
-        return {"message": "user Update commit failed"}
+        flash('Update User failed')
+        return redirect(url_for('view_blueprint.users'))
 
     return redirect(url_for('view_blueprint.users'))
-
-
-
 
 @view_blueprint.route('/delete_user/<user_id>', methods=['GET', 'POST'])
 def delete_user(user_id):
-    user = db_session.query(models.User).filter(models.User.id == user_id).delete()
-    db_session.commit()
+    try:
+        user = db_session.query(models.User).filter(models.User.id == user_id).delete()
+        db_session.commit()
+        flash('User delete success')
+
+    except Exception as e:
+        print(e)
+        flash('User Delete Failed')
+        return redirect(url_for('view_blueprint.users'))
+
     return redirect(url_for('view_blueprint.users'))
 
+"""
+Template for Merchants
+"""
 @view_blueprint.route('/merchants/')
 def merchants():
     merchants = db_session.query(models.Merchant).all()
@@ -219,16 +228,22 @@ def add_merchant():
     except Exception as e:
         print(e)
         return {"message": "something went wrong in creating or adding merchants"}
-
     try:
         db_session.commit()
+        flash('New Merchant successfully added')
 
     except Exception as e:
         print(e)
-        return {"message": "something went wrong in commit() merchants"}
+        flash('New Merchant failed to add')
+        return redirect(url_for('view_blueprint.merchants'))
 
     return redirect(url_for('view_blueprint.merchants'))
 
+@view_blueprint.route('/update_merchant_uri/<merchant_id>', methods=['GET', 'POST'])
+def update_merchant_uri(merchant_id):
+    merchants = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).all()
+    boys = db_session.query(models.Delivery_Boy).all()
+    return render_template('update_merchant.html', title="Update Merchant", merchants=merchants, boys=boys)
 
 @view_blueprint.route('/update_merchant/', methods=['POST'])
 def update_merchant():
@@ -264,39 +279,32 @@ def update_merchant():
         return {"message": "merchant Update Adding failed"}
     try:
         db_session.commit()
+        flash('Update Merchant success')
 
     except Exception as e:
         print(e)
-        return {"message": "merchant Update commit failed"}
+        flash('Update Merchant failed')
+        return redirect(url_for('view_blueprint.merchants'))
 
     return redirect(url_for('view_blueprint.merchants'))
 
 @view_blueprint.route('/delete_merchant/<merchant_id>', methods=['GET', 'POST'])
 def delete_merchant(merchant_id):
-    merchant = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).delete()
-    db_session.commit()
-    return redirect(url_for('view_blueprint.merchants'))
-
-@view_blueprint.route('/orders/')
-def orders(delete=None):
-    orders = db_session.query(models.User, models.Order, models.Merchant, models.Delivery_Boy).filter(models.User.id == models.Order.user_id).filter(models.Merchant.id == models.Order.merchant_id).filter(models.Delivery_Boy.id == models.Order.boys_id).all()
-    total_order = len(orders)
-    if request.args.get('delete') == "success":
-        flash('Delete Entry Success')
-    elif request.args.get('delete') == "fail":
-        flash('Delete Entry Failed')
-    return render_template('orders.html', orders=orders, total_order=total_order, title="Orders")
-
-@view_blueprint.route('/delete_order/<order_id>', methods=['GET', 'POST'])
-def delete_order(order_id):
     try:
-        order = db_session.query(models.Order).filter(models.Order.id == order_id).delete()
+        merchant = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).delete()
         db_session.commit()
+        flash('Merchant delete success')
+
     except Exception as e:
         print(e)
-        return redirect(url_for('view_blueprint.orders', delete="fail"))
-    return redirect(url_for('view_blueprint.orders', delete="success"))
+        flash('Merchant Delete Failed')
+        return redirect(url_for('view_blueprint.merchants'))
 
+    return redirect(url_for('view_blueprint.merchants'))
+
+"""
+Template for Delivery Boy
+"""
 @view_blueprint.route('/delivery_boy/')
 def delivery_boy():
     boys = db_session.query(models.Delivery_Boy).all()
@@ -320,15 +328,21 @@ def add_boy():
     except Exception as e:
         print(e)
         return {"message": "something went wrong in creating boy"}
-
     try:
         db_session.commit()
+        flash('New delivery boy successfully added')
 
     except Exception as e:
         print(e)
-        return {"message": "something went wrong in creating boy"}
+        flash('New delivery boy failed to add')
+        return redirect(url_for('view_blueprint.delivery_boy'))
 
     return redirect(url_for('view_blueprint.delivery_boy'))
+
+@view_blueprint.route('/update_boy_uri/<boy_id>', methods=['GET', 'POST'])
+def update_boy_uri(boy_id):
+    boys = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).all()
+    return render_template('update_delivery_boy.html', title="Update boys", boys=boys)
 
 @view_blueprint.route('/update_boy/', methods=['POST'])
 def update_boy():
@@ -351,16 +365,48 @@ def update_boy():
         return {"message": "delivery_boy Update Adding failed"}
     try:
         db_session.commit()
+        flash('Update delivery boy Success')
 
     except Exception as e:
         print(e)
-        return {"message": "delivery_boy Update commit failed"}
+        flash('Update delivery boy failed')
+        return redirect(url_for('view_blueprint.delivery_boy'))
 
     return redirect(url_for('view_blueprint.delivery_boy'))
-
 
 @view_blueprint.route('/delete_boy/<boy_id>', methods=['GET', 'POST'])
 def delete_boy(boy_id):
-    boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).delete()
-    db_session.commit()
+    try:
+        boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).delete()
+        db_session.commit()
+        flash('DeliveryBoy Delete Success')
+
+    except Exception as e:
+        print(e)
+        flash('DeliveryBoy Delete Failed')
+        return redirect(url_for('view_blueprint.delivery_boy'))
+
     return redirect(url_for('view_blueprint.delivery_boy'))
+
+"""
+Template for Orders
+"""
+@view_blueprint.route('/orders/')
+def orders():
+    orders = db_session.query(models.User, models.Order, models.Merchant, models.Delivery_Boy).filter(models.User.id == models.Order.user_id).filter(models.Merchant.id == models.Order.merchant_id).filter(models.Delivery_Boy.id == models.Order.boys_id).all()
+    total_order = len(orders)
+    return render_template('orders.html', orders=orders, total_order=total_order, title="Orders")
+
+@view_blueprint.route('/delete_order/<order_id>', methods=['GET', 'POST'])
+def delete_order(order_id):
+    try:
+        order = db_session.query(models.Order).filter(models.Order.id == order_id).delete()
+        db_session.commit()
+        flash('Order Delete Success')
+
+    except Exception as e:
+        print(e)
+        flash('Order Delete Failed')
+        return redirect(url_for('view_blueprint.orders'))
+
+    return redirect(url_for('view_blueprint.orders'))
