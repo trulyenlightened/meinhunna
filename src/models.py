@@ -58,9 +58,9 @@ class Order(Base):
     boys_id = sqlalchemy.Column(sqlalchemy.ForeignKey(Delivery_Boy.id))
     items = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.String))
     quantity = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.String))
-    delivery_id = sqlalchemy.Column(sqlalchemy.BigInteger, nullable=True)
     order_address = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     status = sqlalchemy.Column(sqlalchemy.types.Enum(Delivery_Status))
+    discription = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     created_at = sqlalchemy.Column(sqlalchemy.DateTime(), nullable=True)
 
 class Item(Base):

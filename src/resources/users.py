@@ -115,6 +115,32 @@ class User(flask_restful.Resource):
         """ DELETE request """
         pass
 
+class ForgotPassword(flask_restful.Resource):
+    @staticmethod
+    def post():
+        try:
+            me_response = json.loads(request.data.decode('utf-8'))
+            phone_number = me_response['phone_number']
+
+            user = db_session.query(models.User).filter(models.User.phone_number == phone_number).one_or_none()
+            if user is None:
+                return {
+                    "message": "phone number not found"
+                }
+            r1 = random.randint(1234, 9876)
+            OTP_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ phone_number + "&language=hindi&message=आपका OTP यह है " + str(r1) + "&type=3"
+            response = requests.get(OTP_message)
+            return {
+                "phone_number": phone_number,
+                "OTP": r1,
+                "message": "success"
+            }
+        except Exception as e:
+            print(e)
+            return {
+                "message": "failed to send OTP"
+            }
+
 class OTPSignUp(flask_restful.Resource):
     @staticmethod
     def post():
