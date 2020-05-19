@@ -115,7 +115,7 @@ class User(flask_restful.Resource):
         """ DELETE request """
         pass
 
-class ForgotPassword(flask_restful.Resource):
+class ForgotPasswordOTP(flask_restful.Resource):
     @staticmethod
     def post():
         try:
@@ -140,6 +140,36 @@ class ForgotPassword(flask_restful.Resource):
             return {
                 "message": "failed to send OTP"
             }
+
+class ForgotPassword(flask_restful.Resource):
+    @staticmethod
+    def post():
+        try:
+            me_response = json.loads(request.data.decode('utf-8'))
+            password = me_response['password']
+            phone_number = me_response['phone_number']
+
+            user = db_session.query(models.User).filter(models.User.phone_number == phone_number).one_or_none()
+            if user is None:
+                return {
+                    "message": "phone number not found"
+                }
+
+            password_hash = ph.hash(me_response['password'])
+            user.password_hash = password_hash
+
+        except Exception as e:
+            print(e)
+            return {"message": "failed to send OTP"}
+        try:
+            db_session.commit()
+            return {
+                "message": "password successfully changed"
+            }
+        except Exception as ex:
+            print(ex)
+            db_session.rollback()
+            flask_restful.abort(400, message="change password error")
 
 class OTPSignUp(flask_restful.Resource):
     @staticmethod
