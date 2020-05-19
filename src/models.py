@@ -60,7 +60,7 @@ class Order(Base):
     quantity = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.String))
     order_address = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     status = sqlalchemy.Column(sqlalchemy.types.Enum(Delivery_Status))
-    discription = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
+    description = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.String), nullable=True)
     created_at = sqlalchemy.Column(sqlalchemy.DateTime(), nullable=True)
 
 class Item(Base):
