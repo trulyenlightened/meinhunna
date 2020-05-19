@@ -378,7 +378,7 @@ def delete_merchant(merchant_id):
     return redirect(url_for('view_blueprint.merchants'))
 
 """
-Template for Delivery Boy
+Template for Delivery_Boy
 """
 @view_blueprint.route('/delivery_boy/')
 def delivery_boy():
