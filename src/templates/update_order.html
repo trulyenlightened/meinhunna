@@ -1,0 +1,22 @@
+<<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+        <form action="{{ url_for('view_blueprint.update_orders') }}" method="post">
+            {{ csrf_token }}
+            <div class="modal-body" style="margin-top: 50px;">
+                <div class="form-group">
+                    <label>Id</label>
+                    <input type="text" class="form-control" name="id">
+                    <input type="hidden" name="id">
+                </div>
+            </div>
+            <div>
+                <input type="submit" class="btn btn-success" style="margin-left:14px;" value="Update">
+            </div>
+        </form>
+    </body>
+</html>
