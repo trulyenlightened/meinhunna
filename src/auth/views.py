@@ -478,14 +478,31 @@ def orders():
 @view_blueprint.route('/delete_order/<order_id>', methods=['GET', 'POST'])
 def delete_order(order_id):
     try:
-        order = db_session.query(models.Order).filter(models.Order.id == order_id).delete()
+        order = db_session.query(models.Order).filter(models.Order.id == order_id).one_or_none()
+        order.status = models.Delivery_Status.Cancelled
         db_session.commit()
-        flash('Order Delete Success')
+        flash('Order Cancelled Success')
 
     except Exception as e:
         print(e)
         db_session.rollback()
-        flash('Order Delete Failed')
+        flash('Order Cancelled Failed')
+        return redirect(url_for('view_blueprint.orders'))
+
+    return redirect(url_for('view_blueprint.orders'))
+
+@view_blueprint.route('/complete_order/<order_id>', methods=['GET', 'POST'])
+def complete_order(order_id):
+    try:
+        order = db_session.query(models.Order).filter(models.Order.id == order_id).one_or_none()
+        order.status = models.Delivery_Status.Delivered
+        db_session.commit()
+        flash('Order complete Success')
+
+    except Exception as e:
+        print(e)
+        db_session.rollback()
+        flash('Order complete Failed')
         return redirect(url_for('view_blueprint.orders'))
 
     return redirect(url_for('view_blueprint.orders'))

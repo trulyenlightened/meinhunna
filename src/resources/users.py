@@ -252,7 +252,7 @@ class Order(flask_restful.Resource):
             m = "नाम : "+merchant.name+"\n"+"फ़ोन नंबर : "+merchant.phone_number+"\n"
             msg = []
             for i in range(len(me_response['items'])):
-                msg.append("("+str(i+1)+") "+str(me_response['items'][i])+" "+str(me_response['quantity'][i])+"\n")
+                msg.append("("+str(i+1)+") "+str(me_response['items'][i])+" "+str(me_response['quantity'][i])+" "+str(me_response['description'][i])+"\n")
 
             stng = ""
             for ele in msg:
@@ -263,7 +263,7 @@ class Order(flask_restful.Resource):
                                         boys_id=merchant.boys_id[0],
                                         items=me_response['items'],
                                         quantity=me_response['quantity'],
-                                        discription=me_response['discription'],
+                                        description=me_response['description'],
                                         order_address=address,
                                         status=models.Delivery_Status.Pending,
                                         created_at=datetime.datetime.now())
