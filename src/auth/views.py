@@ -506,3 +506,37 @@ def complete_order(order_id):
         return redirect(url_for('view_blueprint.orders'))
 
     return redirect(url_for('view_blueprint.orders'))
+
+
+@view_blueprint.route('/update_orders/', methods=['POST'])
+def update_orders():
+    try:
+        id = request.form['id']
+
+        order = db_session.query(models.Order).filter(models.Order.id == int(id)).one_or_none()
+
+
+        order.description = None
+        db_session.commit()
+        db_session.refresh(order)
+        order.description = ["des"]
+    except Exception as e:
+
+        print(e)
+        db_session.rollback()
+        return {"message": "merchant Update Adding failed"}
+    try:
+        db_session.commit()
+        flash('Update Merchant success')
+
+    except Exception as e:
+        print(e)
+        db_session.rollback()
+        flash('Update Merchant failed')
+        return redirect(url_for('view_blueprint.orders'))
+
+    return redirect(url_for('view_blueprint.orders'))
+
+@view_blueprint.route('/update_orders_uri/')
+def update_orders_uri():
+    return render_template('update_order.html')
