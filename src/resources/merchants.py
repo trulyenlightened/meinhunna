@@ -150,6 +150,7 @@ class Items(flask_restful.Resource):
             }
         except Exception as e:
             print(e)
+            db_session.rollback()
             return {"message": "failed to store item"}
 
     @staticmethod
@@ -220,6 +221,7 @@ class DeliveryBoy(flask_restful.Resource):
             }
         except Exception as e:
             print(e)
+            db_session.rollback()
             return {"message": "failed to create boy"}
 
     @staticmethod

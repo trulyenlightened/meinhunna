@@ -71,6 +71,12 @@ def admin_login():
 """
 Template for Items
 """
+@view_blueprint.route('/items/')
+def items():
+    items = db_session.query(models.Item).all()
+    total_item = len(items)
+    return render_template('items.html', items=items, total_item=total_item, title="Items")
+
 @view_blueprint.route('/add_item/')
 def add_item():
     sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
@@ -96,12 +102,74 @@ def add_item_hide():
     try:
         db_session.commit()
         flash('Item successfully added')
-        return redirect(url_for('view_blueprint.add_item'))
-        
+        return redirect(url_for('view_blueprint.items'))
+
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('Item failed to add')
-        return redirect(url_for('view_blueprint.add_item'))
+        return redirect(url_for('view_blueprint.items'))
+
+@view_blueprint.route('/update_item_uri/<item_id>', methods=['GET', 'POST'])
+def update_item_uri(item_id):
+    items = db_session.query(models.Item).filter(models.Item.id == item_id).all()
+    sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
+
+    if items[0].sub_category_id is None:
+        sub_name = None
+    else:
+        for sub_item in sub_items:
+            if sub_item.id == int(items[0].sub_category_id):
+                sub_name = sub_item.item_name
+                break
+
+    return render_template('update_item.html', title="Update Item", items=items, sub_items=sub_items, sub_name=sub_name)
+
+@view_blueprint.route('/update_item/', methods=['POST'])
+def update_item():
+    try:
+
+        id = request.form['id']
+        name = request.form['new_name']
+        item_unit = request.form['item_unit']
+        sub_category_id = request.form['sub_category_id']
+        item = db_session.query(models.Item).filter(models.Item.id == int(id)).one_or_none()
+
+        if sub_category_id == "None":
+            sub_category_id = None
+        item.item_name = name
+        item.item_unit = item_unit
+        item.sub_category_id = sub_category_id
+
+    except Exception as e:
+        print(e)
+        return {"message": "user Update Adding failed"}
+    try:
+        db_session.commit()
+        flash('Update Item success')
+
+    except Exception as e:
+        print(e)
+        db_session.rollback()
+        flash('Update Item failed')
+        return redirect(url_for('view_blueprint.items'))
+
+    return redirect(url_for('view_blueprint.items'))
+
+@view_blueprint.route('/delete_item/<item_id>', methods=['GET', 'POST'])
+def delete_item(item_id):
+    try:
+        item = db_session.query(models.Item).filter(models.Item.id == item_id).delete()
+        db_session.commit()
+        flash('Item delete success')
+
+    except Exception as e:
+        print(e)
+        db_session.rollback()
+        flash('Item Delete Failed')
+        return redirect(url_for('view_blueprint.items'))
+
+    return redirect(url_for('view_blueprint.items'))
 
 """
 Template for Users
@@ -139,6 +207,7 @@ def add_user():
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('New User failed to add')
         return redirect(url_for('view_blueprint.users'))
 
@@ -176,6 +245,7 @@ def update_user():
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('Update User failed')
         return redirect(url_for('view_blueprint.users'))
 
@@ -190,6 +260,7 @@ def delete_user(user_id):
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('User Delete Failed')
         return redirect(url_for('view_blueprint.users'))
 
@@ -234,6 +305,7 @@ def add_merchant():
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('New Merchant failed to add')
         return redirect(url_for('view_blueprint.merchants'))
 
@@ -271,9 +343,10 @@ def update_merchant():
         if int(boys_id) in merchant.boys_id:
             pass
         else:
-            del merchant.boys_id[0]
-            merchant.boys_id.append(int(boys_id))
-
+            merchant.boys_id[0] = None
+            db_session.commit()
+            db_session.refresh(merchant)
+            merchant.boys_id = [int(boys_id)]
     except Exception as e:
         print(e)
         return {"message": "merchant Update Adding failed"}
@@ -283,6 +356,7 @@ def update_merchant():
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('Update Merchant failed')
         return redirect(url_for('view_blueprint.merchants'))
 
@@ -297,6 +371,7 @@ def delete_merchant(merchant_id):
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('Merchant Delete Failed')
         return redirect(url_for('view_blueprint.merchants'))
 
@@ -334,6 +409,7 @@ def add_boy():
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('New delivery boy failed to add')
         return redirect(url_for('view_blueprint.delivery_boy'))
 
@@ -369,6 +445,7 @@ def update_boy():
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('Update delivery boy failed')
         return redirect(url_for('view_blueprint.delivery_boy'))
 
@@ -383,6 +460,7 @@ def delete_boy(boy_id):
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('DeliveryBoy Delete Failed')
         return redirect(url_for('view_blueprint.delivery_boy'))
 
@@ -406,6 +484,7 @@ def delete_order(order_id):
 
     except Exception as e:
         print(e)
+        db_session.rollback()
         flash('Order Delete Failed')
         return redirect(url_for('view_blueprint.orders'))
 
