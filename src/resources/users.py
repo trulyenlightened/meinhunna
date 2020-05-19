@@ -233,7 +233,7 @@ class Order(flask_restful.Resource):
                                         boys_id=merchant.boys_id[0],
                                         items=me_response['items'],
                                         quantity=me_response['quantity'],
-                                        delivery_id=random.randint(123456, 987654),
+                                        discription=me_response['discription'],
                                         order_address=address,
                                         status=models.Delivery_Status.Pending,
                                         created_at=datetime.datetime.now())
