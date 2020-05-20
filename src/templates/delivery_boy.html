@@ -108,6 +108,7 @@
                         <th>Name</th>
                         <th>Phone</th>
                         <th>Email</th>
+                        <th>Created_at</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -128,7 +129,7 @@
                         {% else %}
                             <td>{{ boy.email }}</td>
                         {% endif %}
-
+                        <td>{{ boy.created_at }}</td>
                         <td>
                             <a href="{{ url_for('view_blueprint.update_boy_uri', boy_id=boy.id) }}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
                             <a href="{{ url_for('view_blueprint.delete_boy', boy_id=boy.id) }}" onclick="return confirm('Are you sure you want to delete this item?');" name="boy_id" value="1" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>

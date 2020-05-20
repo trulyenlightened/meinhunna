@@ -112,6 +112,7 @@
                         <th>longitude</th>
                         <th>Deliver Boy</th>
                         <th>Phone</th>
+                        <th>Created_at</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -135,6 +136,7 @@
                                 {% endif %}
                             {% endfor %}
                         <td>{{ merchant.phone_number }}</td>
+                        <td>{{ merchant.created_at }}</td>
                         <td>
                             <a href="{{ url_for('view_blueprint.update_merchant_uri', merchant_id=merchant.id) }}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
                             <a href="{{ url_for('view_blueprint.delete_merchant', merchant_id=merchant.id) }}" onclick="return confirm('Are you sure you want to delete this item?');" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
