@@ -7,6 +7,7 @@ from argon2 import PasswordHasher
 import jsonify
 from functools import wraps
 from pytz import timezone
+import pytz
 from sqlalchemy import desc
 
 import jwt
@@ -193,8 +194,8 @@ def add_user():
         phone_number = request.form['phone_number']
         password = request.form['password']
 
-        now_asia = datetime.datetime.now().astimezone(timezone('Asia/Kolkata'))
-        # now_asia.strftime("%d-%m-%Y %I:%M %p")
+        now_asia = datetime.datetime.now(timezone('Asia/Kolkata'))
+        print(now_asia.strftime("%d-%m-%Y %I:%M %p"))
 
         create_user = models.User(phone_number=phone_number,
                                     name=name,
@@ -295,13 +296,15 @@ def add_merchant():
         boys_id = request.form['delivery-boys']
         phone_number = request.form['phone_number']
 
+        now_asia = datetime.datetime.now(timezone('Asia/Kolkata'))
+
         create_merchant = models.Merchant(phone_number=phone_number,
                                     name=name,
                                     email=email,
                                     latitude=latitude,
                                     longitude=longitude,
                                     boys_id=[int(boys_id)],
-                                    created_at=datetime.datetime.now())
+                                    created_at=now_asia)
         db_session.add(create_merchant)
         db_session.flush()
 
@@ -404,10 +407,12 @@ def add_boy():
         email = request.form['email']
         phone_number = request.form['phone_number']
 
+        now_asia = datetime.datetime.now(timezone('Asia/Kolkata'))
+
         create_boy = models.Delivery_Boy(phone_number=phone_number,
                                     name=name,
                                     email=email,
-                                    created_at=datetime.datetime.now())
+                                    created_at=now_asia)
         db_session.add(create_boy)
         db_session.flush()
 
