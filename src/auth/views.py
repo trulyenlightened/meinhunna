@@ -179,8 +179,8 @@ Template for Users
 @view_blueprint.route('/users/')
 def users():
     users = db_session.query(models.User).order_by(desc(models.User.created_at)).all()
-    for user in users:
-        user.created_at = user.created_at.strftime("%d-%m-%Y %I:%M %p")
+    # for user in users:
+    #     user.created_at = user.created_at.strftime("%d-%m-%Y %I:%M %p")
     total_user = len(users)
     return render_template('users.html', users=users, total_user=total_user, title="Users")
 
@@ -279,8 +279,8 @@ Template for Merchants
 @view_blueprint.route('/merchants/')
 def merchants():
     merchants = db_session.query(models.Merchant).order_by(desc(models.Merchant.created_at)).all()
-    for merchant in merchants:
-        merchant.created_at = merchant.created_at.strftime("%d-%m-%Y %I:%M %p")
+    # for merchant in merchants:
+    #     merchant.created_at = merchant.created_at.strftime("%d-%m-%Y %I:%M %p")
     boys = db_session.query(models.Delivery_Boy).all()
     total_merchant = len(merchants)
     return render_template('merchants.html', merchants=merchants, total_merchant=total_merchant, boys=boys, title="Merchants")
@@ -392,8 +392,8 @@ Template for Delivery Boy
 @view_blueprint.route('/delivery_boy/')
 def delivery_boy():
     boys = db_session.query(models.Delivery_Boy).order_by(desc(models.Delivery_Boy.created_at)).all()
-    for boy in boys:
-        boy.created_at = boy.created_at.strftime("%d-%m-%Y %I:%M %p")
+    # for boy in boys:
+    #     boy.created_at = boy.created_at.strftime("%d-%m-%Y %I:%M %p")
     total_boy = len(boys)
     return render_template('delivery_boy.html', boys=boys, total_boy=total_boy, title="Delivery_Boy")
 
@@ -483,8 +483,8 @@ Template for Orders
 @view_blueprint.route('/orders/')
 def orders():
     orders = db_session.query(models.User, models.Order, models.Merchant, models.Delivery_Boy).filter(models.User.id == models.Order.user_id).filter(models.Merchant.id == models.Order.merchant_id).filter(models.Delivery_Boy.id == models.Order.boys_id).order_by(desc(models.Order.created_at)).all()
-    for order in orders:
-        order[1].created_at = order[1].created_at.strftime("%d-%m-%Y %I:%M %p")
+    # for order in orders:
+    #     order[1].created_at = order[1].created_at.strftime("%d-%m-%Y %I:%M %p")
     total_order = len(orders)
     return render_template('orders.html', orders=orders, total_order=total_order, title="Orders")
 
