@@ -120,10 +120,14 @@
 								<label for="checkbox1"></label>
 							</span>
 						</td>
-                        <td>{{ item.id }}</td>
+                        <td>{{ loop.index }}</td>
                         <td>{{ item.item_name }}</td>
                         <td>{{ item.item_unit }}</td>
-						<td>{{ item.sub_category_id }}</td>
+                        <td>{% for name in items %}
+                            {% if name.id == item.sub_category_id %}
+                                {{ name.item_name }}
+                            {% endif %}
+                        {% endfor %}</td>
                         <td>
                             <a href="{{ url_for('view_blueprint.update_item_uri', item_id=item.id) }}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
                             <a href="{{ url_for('view_blueprint.delete_item', item_id=item.id) }}" onclick="return confirm('Are you sure you want to delete this item?');" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
