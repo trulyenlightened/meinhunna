@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{ title }} | DIREXION IT </title>
+    <title> Dashboard | DIREXION IT </title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
@@ -25,14 +25,8 @@
                   <li><a href="{{ url_for('view_blueprint.merchants') }}">Merchants</a></li>
                   <li><a href="{{ url_for('view_blueprint.orders') }}">Orders</a></li>
                   <li><a href="{{ url_for('view_blueprint.delivery_boy') }}">Delivery Boys</a></li>
-                  <!-- <li><a href="{{ url_for('view_blueprint.admin') }}">Admin Login</a></li>
-                   <li>
-                       <form action="{{ url_for('view_blueprint.logout') }}" method="post">
-                           <button type="submit" class="btn btn-danger" style="margin-top: 10px;">Logout</button>
-                       </form>
-                   </li> -->
-                  <!-- <li><a href="#">Register</a></li> -->
-                  <!-- <li><a href="#">Login</a></li> -->
+                  <li><a href="{{ url_for('view_blueprint.items') }}">Items</a></li>
+                  <li><a style="color: red;" href="{{ url_for('view_blueprint.admin_logout') }}">Logout</a></li>
               </ul>
           </div>
         </div>

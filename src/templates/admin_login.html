@@ -13,6 +13,13 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        window.setTimeout(function() {
+            $(".alert").fadeTo(500, 0).slideUp(500, function(){
+                $(this).remove();
+            });
+        }, 3000);
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-default navbar-fixed-top topnav" role="navigation">
@@ -32,6 +39,7 @@
                   <li><a href="{{ url_for('view_blueprint.merchants') }}">Merchants</a></li>
                   <li><a href="{{ url_for('view_blueprint.orders') }}">Orders</a></li>
                   <li><a href="{{ url_for('view_blueprint.delivery_boy') }}">Delivery Boys</a></li>
+                  <li><a href="{{ url_for('view_blueprint.items') }}">Items</a></li>
               </ul>
           </div>
         </div>
@@ -53,6 +61,21 @@
                 <input type="submit" class="btn btn-success" value="Log In">
             </div>
         </form>
+        <br>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="container my-4">
+            <div class="alert alert-danger" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <ul class=flashes>
+                {% for message in messages %}
+                  <div>{{ message }}</div>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
     </div>
 
 </body>

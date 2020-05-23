@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request,flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from src.database import db_session
 import src.models as models
 from datetime import datetime
@@ -7,35 +7,19 @@ from argon2 import PasswordHasher
 import jsonify
 from functools import wraps
 from pytz import timezone
-import pytz
 from sqlalchemy import desc
-
-import jwt
-from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token, set_access_cookies, jwt_refresh_token_required,
-    get_jwt_identity, create_refresh_token, set_refresh_cookies, unset_jwt_cookies, verify_jwt_in_request
-)
-
 
 ph = PasswordHasher(hash_len=64, salt_len=32)
 
 view_blueprint = Blueprint('view_blueprint', __name__)
-
-def jwt_required(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        try:
-            verify_jwt_in_request()
-        except:
-            return redirect(url_for('view_blueprint.admin'))
-        return fn(*args, **kwargs)
-    return wrapper
 
 """
 Template for Dashboard
 """
 @view_blueprint.route('/dashboard/')
 def index():
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     return render_template('index.html')
 
 """
@@ -45,11 +29,10 @@ Template for Admin
 def admin():
     return render_template('admin_login.html', title="Admin Login")
 
-@view_blueprint.route('/admin_logout/', methods=['POST'])
-def logout():
-    res = redirect(url_for('view_blueprint.index'))
-    unset_jwt_cookies(res)
-    return res
+@view_blueprint.route('/admin_logout/')
+def admin_logout():
+    session['logged_in'] = False
+    return redirect(url_for('view_blueprint.admin'))
 
 @view_blueprint.route('/admin_login/', methods=['POST'])
 def admin_login():
@@ -58,30 +41,35 @@ def admin_login():
 
     admin = db_session.query(models.Admin).filter(models.Admin.name == name).one_or_none()
     if admin is None:
-        return {"message": "Admin Not Available"}
+        flash('Wrong Admin Name !!!')
+        return redirect(url_for('view_blueprint.admin'))
 
     try:
         ph.verify(admin.password_hash, password)
-        access_token = create_access_token(identity=name)
-        resp = redirect(url_for('view_blueprint.users'))
-        # set_access_cookies(resp, access_token)
+        session['logged_in'] = True
+
     except Exception as e:
         print(e)
-        return {"message": "Admin Verification Failed"}
+        flash('Wrong Password !!!')
+        return redirect(url_for('view_blueprint.admin'))
 
-    return resp
+    return redirect(url_for('view_blueprint.index'))
 
 """
 Template for Items
 """
 @view_blueprint.route('/items/')
 def items():
-    items = db_session.query(models.Item).all()
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
+    items = db_session.query(models.Item).order_by(desc(models.Item.id)).all()
     total_item = len(items)
     return render_template('items.html', items=items, total_item=total_item, title="Items")
 
 @view_blueprint.route('/add_item/')
 def add_item():
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
     return render_template('add_item.html', sub_items=sub_items)
 
@@ -115,6 +103,8 @@ def add_item_hide():
 
 @view_blueprint.route('/update_item_uri/<item_id>', methods=['GET', 'POST'])
 def update_item_uri(item_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     items = db_session.query(models.Item).filter(models.Item.id == item_id).all()
     sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
 
@@ -131,7 +121,6 @@ def update_item_uri(item_id):
 @view_blueprint.route('/update_item/', methods=['POST'])
 def update_item():
     try:
-
         id = request.form['id']
         name = request.form['new_name']
         item_unit = request.form['item_unit']
@@ -161,6 +150,8 @@ def update_item():
 
 @view_blueprint.route('/delete_item/<item_id>', methods=['GET', 'POST'])
 def delete_item(item_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     try:
         item = db_session.query(models.Item).filter(models.Item.id == item_id).delete()
         db_session.commit()
@@ -179,6 +170,8 @@ Template for Users
 """
 @view_blueprint.route('/users/')
 def users():
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     users = db_session.query(models.User).order_by(desc(models.User.created_at)).all()
     # for user in users:
     #     user.created_at = user.created_at.strftime("%d-%m-%Y %I:%M %p")
@@ -223,26 +216,20 @@ def add_user():
 
 @view_blueprint.route('/update_user_uri/<user_id>', methods=['GET', 'POST'])
 def update_user_uri(user_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     users = db_session.query(models.User).filter(models.User.id == user_id).all()
     return render_template('update_user.html', title="Update User", users=users)
 
 @view_blueprint.route('/update_user/', methods=['POST'])
 def update_user():
     try:
-        name = request.form['name']
-        new_name = request.form['new_name']
-        email = request.form['email']
-        new_email = request.form['new_email']
-        address = request.form['address']
-        new_address = request.form['new_address']
-        phone_number = request.form['phone_number']
-        new_phone_number = request.form['new_phone_number']
-        user = db_session.query(models.User).filter(models.User.name == name).one()
+        user = db_session.query(models.User).filter(models.User.id == request.form['id']).one_or_none()
 
-        user.name = new_name
-        user.email = new_email
-        user.address = new_address
-        user.phone_number = new_phone_number
+        user.name = request.form['new_name']
+        user.email = request.form['new_email']
+        user.address = request.form['new_address']
+        user.phone_number = request.form['new_phone_number']
 
     except Exception as e:
         print(e)
@@ -261,6 +248,8 @@ def update_user():
 
 @view_blueprint.route('/delete_user/<user_id>', methods=['GET', 'POST'])
 def delete_user(user_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     try:
         user = db_session.query(models.User).filter(models.User.id == user_id).delete()
         db_session.commit()
@@ -279,6 +268,8 @@ Template for Merchants
 """
 @view_blueprint.route('/merchants/')
 def merchants():
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     merchants = db_session.query(models.Merchant).order_by(desc(models.Merchant.created_at)).all()
     # for merchant in merchants:
     #     merchant.created_at = merchant.created_at.strftime("%d-%m-%Y %I:%M %p")
@@ -325,6 +316,8 @@ def add_merchant():
 
 @view_blueprint.route('/update_merchant_uri/<merchant_id>', methods=['GET', 'POST'])
 def update_merchant_uri(merchant_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     merchants = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).all()
     boys = db_session.query(models.Delivery_Boy).all()
     return render_template('update_merchant.html', title="Update Merchant", merchants=merchants, boys=boys)
@@ -332,25 +325,14 @@ def update_merchant_uri(merchant_id):
 @view_blueprint.route('/update_merchant/', methods=['POST'])
 def update_merchant():
     try:
-        name = request.form['name']
-        new_name = request.form['new_name']
-        email = request.form['email']
-        new_email = request.form['new_email']
-        latitude = request.form['latitude']
-        new_latitude = request.form['new_latitude']
-        longitude = request.form['longitude']
-        new_longitude = request.form['new_longitude']
         boys_id = request.form['delivery-boys']
-        phone_number = request.form['phone_number']
-        new_phone_number = request.form['new_phone_number']
+        merchant = db_session.query(models.Merchant).filter(models.Merchant.id == request.form['id']).one_or_none()
 
-        merchant = db_session.query(models.Merchant).filter(models.Merchant.name == name).one()
-
-        merchant.name = new_name
-        merchant.email = new_email
-        merchant.latitude = new_latitude
-        merchant.longitude = new_longitude
-        merchant.phone_number = new_phone_number
+        merchant.name = request.form['new_name']
+        merchant.email = request.form['new_email']
+        merchant.latitude = request.form['new_latitude']
+        merchant.longitude = request.form['new_longitude']
+        merchant.phone_number = request.form['new_phone_number']
 
         if int(boys_id) in merchant.boys_id:
             pass
@@ -359,6 +341,7 @@ def update_merchant():
             db_session.commit()
             db_session.refresh(merchant)
             merchant.boys_id = [int(boys_id)]
+
     except Exception as e:
         print(e)
         return {"message": "merchant Update Adding failed"}
@@ -376,6 +359,8 @@ def update_merchant():
 
 @view_blueprint.route('/delete_merchant/<merchant_id>', methods=['GET', 'POST'])
 def delete_merchant(merchant_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     try:
         merchant = db_session.query(models.Merchant).filter(models.Merchant.id == merchant_id).delete()
         db_session.commit()
@@ -394,11 +379,11 @@ Template for Delivery Boy
 """
 @view_blueprint.route('/delivery_boy/')
 def delivery_boy():
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     boys = db_session.query(models.Delivery_Boy).order_by(desc(models.Delivery_Boy.created_at)).all()
-    # for boy in boys:
-    #     boy.created_at = boy.created_at.strftime("%d-%m-%Y %I:%M %p")
     total_boy = len(boys)
-    return render_template('delivery_boy.html', boys=boys, total_boy=total_boy, title="Delivery_Boy")
+    return render_template('delivery_boy.html', boys=boys, total_boy=total_boy, title="Delivery Boys")
 
 @view_blueprint.route('/add_boy/', methods=['POST'])
 def add_boy():
@@ -433,24 +418,19 @@ def add_boy():
 
 @view_blueprint.route('/update_boy_uri/<boy_id>', methods=['GET', 'POST'])
 def update_boy_uri(boy_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     boys = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).all()
     return render_template('update_delivery_boy.html', title="Update boys", boys=boys)
 
 @view_blueprint.route('/update_boy/', methods=['POST'])
 def update_boy():
     try:
-        name = request.form['name']
-        new_name = request.form['new_name']
-        email = request.form['email']
-        new_email = request.form['new_email']
-        phone_number = request.form['phone_number']
-        new_phone_number = request.form['new_phone_number']
+        boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == request.form['id']).one_or_none()
 
-        boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.name == name).one()
-
-        boy.name = new_name
-        boy.email = new_email
-        boy.phone_number = new_phone_number
+        boy.name = request.form['new_name']
+        boy.email = request.form['new_email']
+        boy.phone_number = request.form['new_phone_number']
 
     except Exception as e:
         print(e)
@@ -469,6 +449,8 @@ def update_boy():
 
 @view_blueprint.route('/delete_boy/<boy_id>', methods=['GET', 'POST'])
 def delete_boy(boy_id):
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     try:
         boy = db_session.query(models.Delivery_Boy).filter(models.Delivery_Boy.id == boy_id).delete()
         db_session.commit()
@@ -487,9 +469,9 @@ Template for Orders
 """
 @view_blueprint.route('/orders/')
 def orders():
+    if not session.get('logged_in'):
+        return redirect(url_for('view_blueprint.admin'))
     orders = db_session.query(models.User, models.Order, models.Merchant, models.Delivery_Boy).filter(models.User.id == models.Order.user_id).filter(models.Merchant.id == models.Order.merchant_id).filter(models.Delivery_Boy.id == models.Order.boys_id).order_by(desc(models.Order.created_at)).all()
-    # for order in orders:
-    #     order[1].created_at = order[1].created_at.strftime("%d-%m-%Y %I:%M %p")
     total_order = len(orders)
     return render_template('orders.html', orders=orders, total_order=total_order, title="Orders")
 
@@ -533,7 +515,6 @@ def update_orders():
 
         order = db_session.query(models.Order).filter(models.Order.id == int(id)).one_or_none()
 
-
         order.description = None
         db_session.commit()
         db_session.refresh(order)
@@ -558,3 +539,9 @@ def update_orders():
 @view_blueprint.route('/update_orders_uri/')
 def update_orders_uri():
     return render_template('update_order.html')
+
+
+@view_blueprint.route('/download_csv/')
+def download_csv():
+    pass
+    return redirect(url_for('view_blueprint.users'))
