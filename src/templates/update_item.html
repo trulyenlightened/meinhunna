@@ -41,9 +41,7 @@
             <form action="{{ url_for('view_blueprint.update_item') }}" method="post">
                 {{ csrf_token }}
                 <div class="modal-body" style="margin-top: 50px;">
-                    <div class="form-group">
-                        <input type="hidden" value="{{item.id}}" name="id">
-                    </div>
+                    <input type="hidden" value="{{item.id}}" name="id">
                     <div class="form-group">
                         <label>Name</label>
                         <input type="text" value="{{item.item_name}}" class="form-control" name="new_name">
@@ -53,9 +51,7 @@
                         <label for="item_unit">item_unit</label>
                         <select id="item_unit" name="item_unit">
                             <option value="gram" name="gram">gram</option>
-                            <option value="kg" name="kg">kg</option>
                             <option value="ml" name="ml">ml</option>
-                            <option value="liter" name="liter">liter</option>
                         </select>
                     </div>
                     <div class="form-group">
