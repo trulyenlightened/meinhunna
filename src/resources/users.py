@@ -283,7 +283,7 @@ class Order(flask_restful.Resource):
             flask_restful.abort(400, message="Database error")
 
         try:
-            user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा"+"\n"+"आर्डर नंबर "+str(create_order.id)+"&type=3"
+            user_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ user.phone_number + "&language=hindi&message=" + "मैं हूँ ना की टीम की तरफ से आपके आर्डर के लिए हार्दिक धन्यवाद् आपका आर्डर अगले 90 मिनट में आप तक पहुँच जायेगा"+"\n"+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"डिलिवरी बॉय"+"\n"+b+"&type=3"
             merchant_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ merchant.phone_number + "&language=hindi&message="+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"ग्राहक का नाम और पता"+"\n"+u+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"डिलिवरी बॉय"+"\n"+b+"&type=3"
             boy_message = "http://anysms.in/api.php?username=sanghvinfo&password=474173&sender=MHNCOS&sendto="+ boy.phone_number + "&language=hindi&message="+"आर्डर नंबर "+str(create_order.id)+"\n\n"+"ग्राहक का नाम और पता"+"\n"+u+"\n"+"ग्राहक ने आर्डर किया है"+"\n"+ stng +"\n"+"merchant"+"\n"+m+"&type=3"
 
