@@ -21,6 +21,7 @@ class UserGetListSchema(marshmallow.Schema):
 
     phone_number = marshmallow.fields.Str()
     name = marshmallow.fields.Str()
+    email = marshmallow.fields.Str()
     address = marshmallow.fields.Str()
     created_at = marshmallow.fields.DateTime()
 
