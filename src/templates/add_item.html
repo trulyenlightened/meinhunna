@@ -62,29 +62,27 @@
                     <label>Name</label>
                     <input type="text" class="form-control" name="item_name" required>
                 </div>
-            </div>
-
-            <div class="form-group">
-            <label for="platypus">Item has a Category?</label>
-            <input id="platypus" type="checkbox" name="monotreme" value="platypus" />
-              <select name="sub_category" id="sub_category">
-                  <option value="{{ none }}"> - </option>
-                  {% for sub_item in sub_items %}
-                      <option value="{{ sub_item.id }}">{{ sub_item.item_name }}</option>
-                  {% endfor %}
-              </select>
-            </div>
-
-            <div class="form-group">
-                <label for="item_unit">Item Unit</label>
-                <select id="item_unit" name="item_unit">
-                    <option value="gram" name="gram">gram</option>
-                    <option value="kg" name="kg">kg</option>
-                    <option value="ml" name="ml">ml</option>
-                    <option value="liter" name="liter">liter</option>
-                    <option value="packet" name="packet">packet</option>
-                    <option value="piece" name="piece">piece</option>
-                </select>
+                <div class="form-group">
+                    <label for="platypus">Item has a Category?</label>
+                    <input id="platypus" type="checkbox" name="monotreme" value="platypus" />
+                      <select name="sub_category" id="sub_category">
+                          <option value="{{ none }}"> - </option>
+                          {% for sub_item in sub_items %}
+                              <option value="{{ sub_item.id }}">{{ sub_item.item_name }}</option>
+                          {% endfor %}
+                      </select>
+                </div>
+                <div class="form-group">
+                    <label for="item_unit">Item Unit</label>
+                    <select id="item_unit" name="item_unit">
+                        <option value="gram" name="gram">gram</option>
+                        <option value="kg" name="kg">kg</option>
+                        <option value="ml" name="ml">ml</option>
+                        <option value="liter" name="liter">liter</option>
+                        <option value="packet" name="packet">packet</option>
+                        <option value="piece" name="piece">piece</option>
+                    </select>
+                </div>
             </div>
             <div>
                 <input type="submit" class="btn btn-success" style="margin-left:14px;" value="ADD Item">
