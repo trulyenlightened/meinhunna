@@ -108,6 +108,7 @@ def update_item_uri(item_id):
     items = db_session.query(models.Item).filter(models.Item.id == item_id).all()
     sub_items = db_session.query(models.Item).filter(models.Item.sub_category_id == None).all()
 
+    sub_name = None
     if items[0].sub_category_id is None:
         sub_name = None
     else:
