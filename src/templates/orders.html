@@ -97,12 +97,6 @@
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-						<th>
-							<span class="custom-checkbox">
-								<input type="checkbox" id="selectAll">
-								<label for="selectAll"></label>
-							</span>
-						</th>
                         <th>Id</th>
                         <th>Items</th>
 						<th>Quantity</th>
@@ -119,12 +113,6 @@
                 <tbody>
                     {% for order in orders %}
                     <tr>
-						<td>
-							<span class="custom-checkbox">
-								<input type="checkbox" id="checkbox1" name="options[]" value="1">
-								<label for="checkbox1"></label>
-							</span>
-						</td>
                         <td>{{ loop.index }}</td>
                         <td>{% for order in order[1].items %}
                             {{ order }}<br/>
