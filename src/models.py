@@ -57,6 +57,7 @@ class Order(Base):
     merchant_id = sqlalchemy.Column(sqlalchemy.ForeignKey(Merchant.id))
     boys_id = sqlalchemy.Column(sqlalchemy.ForeignKey(Delivery_Boy.id))
     items = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.String))
+    no_of_items = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.Integer))
     quantity = sqlalchemy.Column(sqlalchemy.types.ARRAY(sqlalchemy.String))
     order_address = sqlalchemy.Column(sqlalchemy.String(256), nullable=True)
     status = sqlalchemy.Column(sqlalchemy.types.Enum(Delivery_Status))

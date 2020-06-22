@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
         	// Activate tooltip
@@ -42,7 +43,28 @@
                 $(this).remove();
             });
         }, 3000);
+
+    $(document).ready(function(){
+        $("#myInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            console.log(value)
+            $("#myTable tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+
+    $(document).ready(function(){
+        $("#search_number").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+
     </script>
+
 </head>
 <body>
     <nav class="navbar navbar-default navbar-fixed-top topnav" role="navigation">
@@ -112,8 +134,16 @@
                         <th>created_at</th>
                         <th>Actions</th>
                     </tr>
+                    <td></td>
+                    <td></td>
+                    <td><input type="text" id="myInput" name="name" placeholder="Search name.."></td>
+                    <td></td>
+                    <td></td>
+                    <td><input type="text" id="search_number" name="number" placeholder="Search number.."></td>
+                    <td></td>
+                    <td></td>
                 </thead>
-                <tbody>
+                <tbody id="myTable">
                     {% for user in users %}
                     <tr>
 						<td>

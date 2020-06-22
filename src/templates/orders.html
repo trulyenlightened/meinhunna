@@ -43,6 +43,17 @@
             });
         }, 3000);
     </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function(){
+        $("#myInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-default navbar-fixed-top topnav" role="navigation">
@@ -105,6 +116,7 @@
 						</th>
                         <th>Id</th>
                         <th>Items</th>
+                        <th>no_of_items</th>
 						<th>Quantity</th>
                         <th>Description</th>
                         <th>Customer</th>
@@ -115,8 +127,23 @@
                         <th>Datetime</th>
                         <!-- <th>Actions</th> -->
                     </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" id="myInput" name="name" placeholder="Search.."></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+
+                    </tr>
                 </thead>
-                <tbody>
+
+                <tbody id="myTable">
                     {% for order in orders %}
                     <tr>
 						<td>
@@ -128,6 +155,9 @@
                         <td>{{ loop.index }}</td>
                         <td>{% for order in order[1].items %}
                             {{ order }}<br/>
+                        {% endfor %}</td>
+                        <td>{% for no in order[1].no_of_items %}
+                            {{ no }}<br/>
                         {% endfor %}</td>
                         <td>{% for quantity in order[1].quantity %}
 						    {{ quantity }}<br/>

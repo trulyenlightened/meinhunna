@@ -263,6 +263,7 @@ class Order(flask_restful.Resource):
                                         merchant_id=me_response['merchant_id'],
                                         boys_id=merchant.boys_id[0],
                                         items=me_response['items'],
+                                        no_of_items=me_response['no_of_items'],
                                         quantity=me_response['quantity'],
                                         description=me_response['description'],
                                         order_address=address,
